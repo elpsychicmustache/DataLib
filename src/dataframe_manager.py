@@ -10,7 +10,7 @@ from .utilities import get_df_from_csv
 
 class DataframeManager:
 
-    def __init__(self, file_path: str="../data/input/", file_name: str="data.csv", date_columns: list[str]=None, column_names: list[str]=None) -> None:
+    def __init__(self, dataframe: pd.DataFrame=None, file_path: str="../data/input/", file_name: str="data.csv", date_columns: list[str]=None, column_names: list[str]=None) -> None:
         """Class used to hold a Pandas dataframe so that standardized analysis can be performed on it.
 
         Args:
@@ -19,7 +19,13 @@ class DataframeManager:
             date_columns (list[str], optional): Columns that contain date information.. Defaults to None.
             column_names (list[str], optional): The names to provide each column. Defaults to None.
         """
-        self._dataframe: pd.DataFrame = get_df_from_csv(file_path, file_name, date_columns, column_names)
+
+
+        if dataframe:
+            self._dataframe = dataframe
+        else:
+            self._dataframe: pd.DataFrame = get_df_from_csv(file_path, file_name, date_columns, column_names)
+        
 
 
     def understand_data(self, head_tail_size: int = 20, analysis_type="short") -> None:
