@@ -70,11 +70,13 @@ class DataframeManager:
             len(self._dataframe[column].loc[self._dataframe[column].isna()])
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
-    def process_data(self) -> None:
+    def process_data(self, ignore_remove:bool=False, ignore_rename:bool=False) -> None:
         """Step two of Exploratory Data Analysis. Provides some generic function that help with processing data.
         """
-        self.remove_columns_interactively()
-        self.rename_columns_interactively()
+        if not ignore_remove:
+            self.remove_columns_interactively()
+        if not ignore_rename:
+            self.rename_columns_interactively()
 
 
     def remove_columns_interactively(self) -> None:
