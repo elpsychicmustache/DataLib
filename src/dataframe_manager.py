@@ -5,8 +5,8 @@
 
 import pandas as pd
 
-from validate_input import get_user_confirmation, validate_argument
-from utilities import get_df_from_csv
+from .validate_input import get_user_confirmation, validate_argument
+from .utilities import get_df_from_csv
 
 class DataframeManager:
 
