@@ -1,3 +1,6 @@
+# ElPsychicMustache
+# 2024-11-04
+
 def get_user_confirmation(message: str, true_options: list[str], false_options: list[str]) -> bool:
     """An infinite loop that repeats that returns true or false based on the user input. User input is casted as str.lower()
 
