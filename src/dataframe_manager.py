@@ -6,7 +6,7 @@
 import pandas as pd
 
 from .validate_input import get_user_confirmation, validate_argument
-from .utilities import get_df_from_csv
+from .utilities import get_df_from_csv, prompt_selection_for_list
 
 
 class DataframeManager:
@@ -78,17 +78,19 @@ class DataframeManager:
         """Step two of Exploratory Data Analysis. Provides some generic function that help with processing data.
         """
         if not ignore_remove:
+            print("\n[!] Starting remove columns step:")
             self.remove_columns_interactively()
         if not ignore_rename:
+            print("\n[!] Starting rename columns step:")
             self.rename_columns_interactively()
+
         # TODO: Show user columns and d-types and offer them to change d-types.
         
+        print("\n[!] Starting null analysis step:")
+        # TODO: Flesh out this step more.
         self._show_null_values()
-
-        # TODO: Show user duplicate rows. 
-        # This should provide them a way to utilize a subset of columns to identify duplicates.
-        # df.loc[df.duplicated(subset=[])] 
-        # Should this include a way to query some values to better understand duplicate values?
+        print("\n[!] Starting duplicate analysis step:")
+        self.analyze_duplicates()
         
         # TODO: Offer user a way to reset index after changes (only needed if duplicates are removed)
 
@@ -110,6 +112,7 @@ class DataframeManager:
             print("[-] No columns removed!")
 
     def _prompt_for_columns_to_remove(self) -> list[str]:
+        # TODO: Move to utilities
         """Prompts the user each column name and asks if they want to remove them.
 
         Returns:
@@ -144,6 +147,7 @@ class DataframeManager:
             print("[-] No columns renamed!")
 
     def _prompt_for_columns_to_rename(self) -> dict[str, str]:
+        # TODO: Move to utilities
         """Prompts the user a way to interactively rename the columns of the dataframe.
 
         Returns:
@@ -159,6 +163,21 @@ class DataframeManager:
                 columns_to_rename[column] = new_column_name
 
         return columns_to_rename
+    
+    def analyze_duplicates(self) -> None:
+        # TODO: Show user duplicate rows. 
+        # This should provide them a way to utilize a subset of columns to identify duplicates.
+        # df.loc[df.duplicated(subset=[])] 
+
+        # Should this include a way to query some values to better understand duplicate values?
+
+        subset_list: list[str] = prompt_selection_for_list(self._dataframe.columns)
+
+        print("\n[!] Here are the duplicate rows:")
+        self._show_duplicates(subset_list)
+    
+    def _show_duplicates(self, subset_list: list[str]):
+        print(f"{self._dataframe.loc[self._dataframe.duplicated(subset=subset_list)]}")
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
