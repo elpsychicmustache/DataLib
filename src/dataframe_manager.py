@@ -70,8 +70,7 @@ class DataframeManager:
         """Prints how many null values appear in each column.
         """
         print(f"\n======= Null values in each column ======= \n")
-        for column in self._dataframe.columns:
-            len(self._dataframe[column].loc[self._dataframe[column].isna()])
+        print(f"{self._dataframe.isna().sum()}")
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
 
@@ -82,6 +81,9 @@ class DataframeManager:
             self.remove_columns_interactively()
         if not ignore_rename:
             self.rename_columns_interactively()
+        # TODO: Show user columns and d-types and offer them to change d-types.
+        
+        self._show_null_values()
 
     def remove_columns_interactively(self) -> None:
         """Provides the user a way to interactively delete columns from the dataframe.
