@@ -1,5 +1,6 @@
-# PsychicMustache
-# 2024-11-04 Created
+# Name: dataframe_manager
+# Author: ElPsychicMustache
+# Created: 2024-11-04
 
 # Code is a work in progress based on teachings of Rob Mulla https://youtu.be/xi0vhXFPegw?si=cicV7Pdf9NTjYBRC
 

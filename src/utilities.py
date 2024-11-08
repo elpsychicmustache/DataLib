@@ -1,5 +1,6 @@
-# ElPsychicMustache
-# 2024-11-04
+# Name: utilities
+# Author: ElPsychicMustache
+# Created: 2024-11-04
 
 import pandas as pd
 
