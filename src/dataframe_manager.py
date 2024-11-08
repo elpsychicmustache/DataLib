@@ -85,6 +85,13 @@ class DataframeManager:
         
         self._show_null_values()
 
+        # TODO: Show user duplicate rows. 
+        # This should provide them a way to utilize a subset of columns to identify duplicates.
+        # df.loc[df.duplicated(subset=[])] 
+        # Should this include a way to query some values to better understand duplicate values?
+        
+        # TODO: Offer user a way to reset index after changes (only needed if duplicates are removed)
+
     def remove_columns_interactively(self) -> None:
         """Provides the user a way to interactively delete columns from the dataframe.
         """
