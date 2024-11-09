@@ -24,9 +24,9 @@ def get_df_from_csv(file_path: str, file_name: str, date_columns: list[str], col
     return pd.read_csv(full_file_path, **read_csv_kwargs)
 
 
-def prompt_selection_for_list(list_of_options: list[str]) -> list[str]:
+def prompt_selection_for_column_list(list_of_options: list[str]) -> list[str]:
 
-    selection_list: list[int]
+    selection_list: list[int] = []
     option_dict: dict[int, str] = {i: list_of_options[i] for i in range(len(list_of_options))}
 
     for (key, value) in option_dict.items():
@@ -41,7 +41,7 @@ def prompt_selection_for_list(list_of_options: list[str]) -> list[str]:
 
     if user_selection_list:
         for selection in user_selection_list:
-            selection_list.append(option_dict[selection])
+            selection_list.append(option_dict[int(selection)])
         return selection_list
     else:
         return list(option_dict.values())

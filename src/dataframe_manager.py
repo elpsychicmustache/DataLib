@@ -7,7 +7,7 @@
 import pandas as pd
 
 from .validate_input import get_user_confirmation, validate_argument
-from .utilities import get_df_from_csv, prompt_selection_for_list
+from .utilities import get_df_from_csv, prompt_selection_for_column_list
 
 
 class DataframeManager:
@@ -166,19 +166,23 @@ class DataframeManager:
         return columns_to_rename
     
     def analyze_duplicates(self) -> None:
-        # TODO: Show user duplicate rows. 
-        # This should provide them a way to utilize a subset of columns to identify duplicates.
-        # df.loc[df.duplicated(subset=[])] 
+        
+        subset_for_dup_identification: list[str] = prompt_selection_for_column_list(self._dataframe.columns)
 
-        # Should this include a way to query some values to better understand duplicate values?
+        duplicate_rows = self._return_duplicates(subset_for_dup_identification)
 
-        subset_list: list[str] = prompt_selection_for_list(self._dataframe.columns)
+        if len(duplicate_rows) == 0:
+            return "[!] There are no duplicates in this dataset with the selected subset_list."
+        else:
+            print("\n[!] Here are the duplicate rows:")
+            print(f"{duplicate_rows.head()}")
 
-        print("\n[!] Here are the duplicate rows:")
-        self._show_duplicates(subset_list)
+        # TODO: Show user a specific duplicate example
+        # TODO: Offer way for user to handle duplicate values.
+
     
-    def _show_duplicates(self, subset_list: list[str]):
-        print(f"{self._dataframe.loc[self._dataframe.duplicated(subset=subset_list)]}")
+    def _return_duplicates(self, subset_list: list[str]) -> pd.DataFrame:
+        return self._dataframe.loc[self._dataframe.duplicated(subset=subset_list)]
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
