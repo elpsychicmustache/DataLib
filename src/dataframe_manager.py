@@ -169,20 +169,42 @@ class DataframeManager:
         
         subset_for_dup_identification: list[str] = prompt_selection_for_column_list(self._dataframe.columns)
 
+        print(f"[!] Looking for duplicates in columns: {subset_for_dup_identification} ...")
         duplicate_rows = self._return_duplicates(subset_for_dup_identification)
 
         if len(duplicate_rows) == 0:
-            return "[!] There are no duplicates in this dataset with the selected subset_list."
+            print("[!] There are no duplicates in this dataset with the selected subset_list.")
         else:
-            print("\n[!] Here are the duplicate rows:")
-            print(f"{duplicate_rows.head()}")
-
-        # TODO: Show user a specific duplicate example
-        # TODO: Offer way for user to handle duplicate values.
-
-    
+            print(f"\n[!] {len(duplicate_rows)} duplicate rows identified. Here is a specific example of a duplicate: ")
+            self._show_duplicate_example(subset_for_dup_identification, duplicate_rows)
+        
+        if len(duplicate_rows) != 0:
+            user_wants_to_remove_duplicates = get_user_confirmation(message="[*] Do you want to remove duplicates (first duplicate row is kept)? [y/N]", true_options=["y", "yes"], false_options=["n", "no", ""])
+            if user_wants_to_remove_duplicates:
+                self._remove_duplicates(subset_for_dup_identification)
+                print("[!] Duplicates removed!")
+            else:
+                print("[!] Duplicates kept!")
+            
     def _return_duplicates(self, subset_list: list[str]) -> pd.DataFrame:
-        return self._dataframe.loc[self._dataframe.duplicated(subset=subset_list)]
+        return self._dataframe.loc[self._dataframe.duplicated(subset=subset_list, keep=False)]
+    
+    def _show_duplicate_example(self, subset_list: list[str], duplicate_examples: pd.DataFrame) -> None:
+        
+        column_values: list[str] = [duplicate_examples.iloc[0][column] for column in subset_list]
+
+        query_dict: dict[str, str] = dict(zip(subset_list, column_values))
+
+        query_results: pd.DataFrame = duplicate_examples
+
+        for column, value in query_dict.items():
+            query_results = query_results[query_results[column] == value]
+
+        print(query_results)
+
+    def _remove_duplicates(self, subset_list: list[str]) -> None:
+        self._dataframe = self._dataframe.drop_duplicates(subset=subset_list, keep="first")
+
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
