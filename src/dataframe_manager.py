@@ -251,8 +251,8 @@ class DataframeManager:
 
     def _show_recommendation(self, column_type: str, high_perc_flag: bool) -> None:
 
-        # TODO: validate user input with column_type - it should only contain ['o', 'i', 'f', 'u', 'c']
-        # Will only be passed string object or numeric type - so these are the only types to analyze
+        validate_argument(valid_arg_options=["o", "i", "f", "u", "c"], user_input=column_type, parameter_name="column_type")
+
         if column_type == 'o':
             if high_perc_flag:
                     print("--> String value and high percentage of nulls, possibly ignore.")
