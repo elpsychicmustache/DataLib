@@ -75,34 +75,39 @@ class DataframeManager:
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
 
-    def prepare_data(self, ignore_remove:bool=False, ignore_rename:bool=False) -> None:
+    def prepare_data(self, ignore_remove:bool=False, ignore_rename:bool=False, ignore_dtypes:bool=False, ignore_nulls:bool=False, ignore_dups: bool=False, ignore_index_reset:bool=False) -> None:
         """Step two of Exploratory Data Analysis. Provides some generic functions that help with processing data.
         """
+        # TODO: Validate argument types as bools using validate_input
         if not ignore_remove:
             print("\n[!] Starting remove columns step:")
             self.remove_columns_interactively()
         if not ignore_rename:
             print("\n[!] Starting rename columns step:")
             self.rename_columns_interactively()
-
-        # TODO: Show user columns and d-types and offer them to change d-types.
-        print("\n[!] Starting d-types step:")
-        self._explain_dtypes()
         
-        print("\n[!] Starting null analysis step:")
-        # TODO: Flesh out this step more.
-        self._show_null_values()
-
-        print("\n[!] Starting duplicate analysis step:")
-        self.analyze_duplicates()
+        if not ignore_dtypes:
+            # TODO: Show user columns and d-types and offer them to change d-types.
+            print("\n[!] Starting d-types step:")
+            self._explain_dtypes()
         
-        print()  # printing empty space so output looks nicer :)
-        user_wants_index_rest: bool = get_user_confirmation(message="[*] Would you like to reset the index? [Y/n]", true_options=["yes", "y", ""], false_options=["no", "n"])
-        if user_wants_index_rest:
-            self._dataframe = self._dataframe.reset_index(drop=True)
-            print("[+] Index has been reset!")
-        else:
-            print("[-] Index has not been reset.")
+        if not ignore_nulls:
+            print("\n[!] Starting null analysis step:")
+            # TODO: Flesh out this step more.
+            self._show_null_values()
+
+        if not ignore_dups:
+            print("\n[!] Starting duplicate analysis step:")
+            self.analyze_duplicates()
+        
+        if not ignore_index_reset:
+            print()  # printing empty space so output looks nicer :)
+            user_wants_index_rest: bool = get_user_confirmation(message="[*] Would you like to reset the index? [Y/n]", true_options=["yes", "y", ""], false_options=["no", "n"])
+            if user_wants_index_rest:
+                self._dataframe = self._dataframe.reset_index(drop=True)
+                print("[+] Index has been reset!")
+            else:
+                print("[-] Index has not been reset.")
 
         print("\n[!] Data preparation step complete!")
 
