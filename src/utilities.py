@@ -60,3 +60,14 @@ def prompt_selection_for_column_list(message: str, list_of_options: list[str], d
         else:
             return []
     
+
+def prompt_for_columns_to_rename(list_of_rename_items: list[str]) -> dict[str, str]:
+    columns_to_rename: dict[str, str] = {}
+
+    for column in list_of_rename_items:
+        new_column_name = str(input(f"[*] Rename column {column} to (leave blank to ignore change): ")).strip()
+
+        if new_column_name != "":
+            columns_to_rename[column] = new_column_name
+
+    return columns_to_rename
