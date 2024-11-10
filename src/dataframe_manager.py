@@ -27,7 +27,7 @@ class DataframeManager:
         else:
             self._dataframe: pd.DataFrame = get_df_from_csv(file_path, file_name, date_columns, column_names)
         
-    def understand_data(self, head_tail_size: int = 20, analysis_type="short") -> None:
+    def understand_data(self, head_tail_size: int=20, analysis_type="short") -> None:
         """Step one of Exploratory data anlysis. Prints some information to help understand the dataframe.
 
         Args:
@@ -242,7 +242,8 @@ class DataframeManager:
         print()  # making output a bit niver
 
         if null_columns:
-            self._show_ratio_of_nulls(null_columns)
+            self._show_ratio_of_nulls(null_columns=null_columns)
+            self._handle_nulls(columns_with_null=null_columns)
 
     def _find_columns_with_nulls(self) -> list[str]:
         """Provides a list of columns that contain null values.
@@ -315,6 +316,14 @@ class DataframeManager:
             else:
                 print("--> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
             
+    def _handle_nulls(self, columns_with_null: list[str]):
+        
+        column_list = prompt_selection_for_column_list(message="[*] Please enter the numbers next to the columns you want to handle null values for. Leaving blank skips this step.", list_of_options=columns_with_null, default_all=False)
+        
+        if column_list:
+            # TODO: Program will ask what type of action user would like to perfrom on each column.
+            print(column_list)
+    
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
 
