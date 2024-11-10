@@ -239,11 +239,11 @@ class DataframeManager:
             self._show_null_values()
             null_columns = self._find_columns_with_nulls()
 
-        print()  # making output a bit niver
+        print()  # making output a bit nicer
 
         if null_columns:
             self._show_ratio_of_nulls(null_columns=null_columns)
-            self._handle_nulls(columns_with_null=null_columns)
+            self._prompt_handle_nulls(columns_with_null=null_columns)
 
     def _find_columns_with_nulls(self) -> list[str]:
         """Provides a list of columns that contain null values.
@@ -289,7 +289,7 @@ class DataframeManager:
         elif dtype_as_string in ['i', 'f', 'u', 'c']:
             mean_value: int|float = column_data.mean()
             median_value: int|float = column_data.median()
-            mode_value: int|float = column_data.mode().index[0]
+            mode_value: int|float = column_data.mode()[0]
             self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
             print(f"\tMean: {mean_value}, median: {median_value}, mode: {mode_value}")
         else:
@@ -316,14 +316,46 @@ class DataframeManager:
             else:
                 print("--> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
             
-    def _handle_nulls(self, columns_with_null: list[str]):
+    def _prompt_handle_nulls(self, columns_with_null: list[str]):
         
         column_list = prompt_selection_for_column_list(message="[*] Please enter the numbers next to the columns you want to handle null values for. Leaving blank skips this step.", list_of_options=columns_with_null, default_all=False)
         
         if column_list:
             # TODO: Program will ask what type of action user would like to perfrom on each column.
-            print(column_list)
+            self._handle_nulls(list_of_columns=column_list)
     
+    def _handle_nulls(self, list_of_columns: list[str]) -> None:
+        
+        # TODO: Handle the column based on user input.
+        for column in list_of_columns:
+            print(f"[*] What would you like to do with column {column}?")
+            user_selection = int(input("0. Do nothing, 1. Replace with mean, 2. Replace with median, 3. Replace with mode (or most common value), 4. Forward fill, 5. Remove entire column, 6. Remove all rows that contain null values"))
+
+            if user_selection == 0:
+                print("[!] Doing nothing.")
+                pass
+            elif user_selection == 1:
+                mean = self._dataframe[column].mean()
+                print(f"[!] Replacing null values with the mean {mean}")
+                self._dataframe[column] = self._dataframe[column].fillna(mean)
+            elif user_selection == 2:
+                median = self._dataframe[column].median()
+                print(f"[!] Replacing null values with the median {median}")
+                self._dataframe[column] = self._dataframe[column].fillna(median)
+            elif user_selection == 3:
+                mode = self._dataframe[column].mode()[0]
+                print(f"[!] Replacing null values with the mode {mode}")
+                self._dataframe[column] = self._dataframe[column].fillna(mode)
+            elif user_selection == 4:
+                print("[!] Replacing null values with forward filling.")
+                self._dataframe[column] = self._dataframe[column].fillna(method="ffill")
+            elif user_selection == 5:
+                print(f"[!] Removing column {column}")
+                self.dataframe = self._dataframe.drop(columns=[column])
+            elif user_selection == 6:
+                print(f"[!] Removing all rows that contain null values in {column}")
+                self.dataframe = self._dataframe.dropna(subset=[column])
+
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
 
