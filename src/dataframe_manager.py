@@ -75,33 +75,39 @@ class DataframeManager:
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
 
-    def prepare_data(self, ignore_remove:bool=False, ignore_rename:bool=False, ignore_dtypes:bool=False, ignore_nulls:bool=False, ignore_dups: bool=False, ignore_index_reset:bool=False) -> None:
-        """Step two of Exploratory Data Analysis. Provides some generic functions that help with processing data.
+    def prepare_data(self, skip_remove:bool=False, skip_rename:bool=False, skip_dtypes:bool=False, skip_nulls:bool=False, skip_dups: bool=False, skip_reset:bool=False) -> None:
+        """Step two of exploratory data anlalysis. Provides a suite of methods that allow a user to prepare the data for further anlaysis.
+
+        Args:
+            skip_remove (bool, optional): Skip the column removal step. Defaults to False.
+            skip_rename (bool, optional): Skip the column rename step. Defaults to False.
+            skip_dtypes (bool, optional): Skip the dtype analysis step. Defaults to False.
+            skip_nulls (bool, optional): Skip the null aalysis step. Defaults to False.
+            skip_dups (bool, optional): Skip the duplicate analysis step. Defaults to False.
+            skip_reset (bool, optional): Skip the index reset step. Defaults to False.
         """
 
         # TODO: Validate argument types as bools using validate_input
-        if not ignore_remove:
+        if not skip_remove:
             print("\n[!] Starting remove columns step:")
             self.remove_columns_interactively()
-        if not ignore_rename:
+        if not skip_rename:
             print("\n[!] Starting rename columns step:")
             self.rename_columns_interactively()
-        
-        if not ignore_dtypes:
+        if not skip_dtypes:
             print("\n[!] Starting d-types step:")
             # TODO: Flesh out this step more.
             #   Show user columns and dtypes
             #   Ask if user wants to change any column's dtypes (mainly datetime, ints, or floats)
             self._explain_dtypes()
         
-        if not ignore_nulls:
+        if not skip_nulls:
             print("\n[!] Starting null analysis step:")
             self.analyze_nulls()
-
-        if not ignore_dups:
+        if not skip_dups:
             print("\n[!] Starting duplicate analysis step:")
             self.analyze_duplicates()
-        if not ignore_index_reset:
+        if not skip_reset:
             print("\n[!] Starting index reset step:")
             self._reset_index()
         
