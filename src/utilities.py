@@ -24,7 +24,17 @@ def get_df_from_csv(file_path: str, file_name: str, date_columns: list[str], col
     return pd.read_csv(full_file_path, **read_csv_kwargs)
 
 
-def prompt_selection_for_column_list(list_of_options: list[str]) -> list[str]:
+def prompt_selection_for_column_list(message: str, list_of_options: list[str], default_all: bool=True) -> list[str]:
+    """_summary_
+
+    Args:
+        message (str): The message to display to the user.
+        list_of_options (list[str]): The list of options the user can choose from.
+        default_all (bool, optional): If the user does nothing, return all options or return no options. Defaults to True.
+
+    Returns:
+        list[str]: The options the user chose.
+    """
 
     selection_list: list[int] = []
     option_dict: dict[int, str] = {i: list_of_options[i] for i in range(len(list_of_options))}
@@ -33,7 +43,8 @@ def prompt_selection_for_column_list(list_of_options: list[str]) -> list[str]:
         print(f"{key}: {value}")
     
     # TODO: move to validate_input
-    user_selection_str = str(input("[*] Please enter the numbers next to each column to use as subsets to find duplicates.\nNumbers should be separated by spaces. Leave blank to select all columns: "))
+    print(message)
+    user_selection_str = str(input("Numbers should be separated by spaces. Leave blank to select all columns: "))
     if user_selection_str == "":
         user_selection_list = []
     else:
@@ -44,5 +55,8 @@ def prompt_selection_for_column_list(list_of_options: list[str]) -> list[str]:
             selection_list.append(option_dict[int(selection)])
         return selection_list
     else:
-        return list(option_dict.values())
+        if default_all:
+            return list(option_dict.values())
+        else:
+            return []
     
