@@ -86,6 +86,8 @@ class DataframeManager:
             self.rename_columns_interactively()
 
         # TODO: Show user columns and d-types and offer them to change d-types.
+        print("\n[!] Starting d-types step:")
+        self._explain_dtypes()
         
         print("\n[!] Starting null analysis step:")
         # TODO: Flesh out this step more.
@@ -112,7 +114,7 @@ class DataframeManager:
 
         columns_to_remove: list[str] = []
         if user_wants_to_remove_columns:
-            columns_to_remove = self._prompt_for_columns_to_remove()
+            columns_to_remove = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column that you would like to remove. Leave blank to ignore.", list_of_options=self._dataframe.columns, default_all=False)
 
         if columns_to_remove:    
             print(f"[!] Removing the following columns: {columns_to_remove}")
@@ -120,24 +122,6 @@ class DataframeManager:
             print(f"[+] Columns removed!")
         else:
             print("[-] No columns removed!")
-
-    def _prompt_for_columns_to_remove(self) -> list[str]:
-        # TODO: Move to utilities
-        """Prompts the user each column name and asks if they want to remove them.
-
-        Returns:
-            list[str]: The list of columns to remove.
-        """
-
-        columns_to_remove: list[str] = []
-
-        for column in self._dataframe.columns:
-            remove_flag: bool = get_user_confirmation(message=f"[*] Remove column {column}? [y/N]: ", true_options=["y", "yes"], false_options=["n", "no", ""])
-
-            if remove_flag:
-                columns_to_remove.append(column)
-
-        return columns_to_remove
     
     def rename_columns_interactively(self) -> None:
         """Provides the user a way to interactively rename the columns.
@@ -179,9 +163,10 @@ class DataframeManager:
         user_wants_to_analyze_duplicates: bool = get_user_confirmation(message="[*] Would you like to analyze duplicates? [Y/n]: ", true_options=["yes", "y", ""], false_options=["no", "n"])
         
         if not user_wants_to_analyze_duplicates:
+            print("[-] Duplicate analysis step skipped.")
             return
         
-        subset_for_dup_identification: list[str] = prompt_selection_for_column_list(self._dataframe.columns)
+        subset_for_dup_identification: list[str] = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column to use as subsets to find duplicates.", list_of_options=self._dataframe.columns)
 
         print(f"[!] Looking for duplicates in columns: {subset_for_dup_identification} ...")
         duplicate_rows = self._return_duplicates(subset_for_dup_identification)
