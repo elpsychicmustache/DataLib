@@ -229,8 +229,20 @@ class DataframeManager:
 
         print("======= Percentage of null values in each column =======")
         for column in null_columns:
-            print(f"[!] {column} {'{:.2%}'.format(self._dataframe[column].isnull().sum() / num_rows)}")
-            # TODO: Add recommendation.
+            perc_null: float = self._dataframe[column].isnull().sum() / num_rows
+            print(f"[!] {column} {'{:.2%}'.format(perc_null)} ", end="")
+            self._show_recommendation(self._dataframe[column], perc_null)
+
+    def _show_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
+        high_perc_flag: bool = percentage_null > 0.3
+        
+        if str(column_data.dtype)[0] == 'o':
+            most_common_value = column_data.value_counts().index[0]
+            if high_perc_flag:
+                print(f"--> string value and high percentage, possibly ignore.")
+            else:
+                print(f"--> string value and low percentage, possibly fill na values with most common value or as 'Unknown'.")
+            print(f"Most common value: {most_common_value}")
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
