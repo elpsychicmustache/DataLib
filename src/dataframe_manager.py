@@ -70,13 +70,13 @@ class DataframeManager:
     def _show_null_values(self):
         """Prints how many null values appear in each column.
         """
-        print(f"\n======= Null values in each column ======= \n")
+        print(f"======= Null values in each column ======= \n")
         print(f"{self._dataframe.isna().sum()}")
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
 
     def prepare_data(self, ignore_remove:bool=False, ignore_rename:bool=False) -> None:
-        """Step two of Exploratory Data Analysis. Provides some generic function that help with processing data.
+        """Step two of Exploratory Data Analysis. Provides some generic functions that help with processing data.
         """
         if not ignore_remove:
             print("\n[!] Starting remove columns step:")
@@ -90,10 +90,19 @@ class DataframeManager:
         print("\n[!] Starting null analysis step:")
         # TODO: Flesh out this step more.
         self._show_null_values()
+
         print("\n[!] Starting duplicate analysis step:")
         self.analyze_duplicates()
         
-        # TODO: Offer user a way to reset index after changes (only needed if duplicates are removed)
+        print()  # printing empty space so output looks nicer :)
+        user_wants_index_rest: bool = get_user_confirmation(message="[*] Would you like to reset the index? [Y/n]", true_options=["yes", "y", ""], false_options=["no", "n"])
+        if user_wants_index_rest:
+            self._dataframe = self._dataframe.reset_index(drop=True)
+            print("[+] Index has been reset!")
+        else:
+            print("[-] Index has not been reset.")
+
+        print("\n[!] Data preparation step complete!")
 
     def remove_columns_interactively(self) -> None:
         """Provides the user a way to interactively delete columns from the dataframe.
@@ -166,6 +175,11 @@ class DataframeManager:
         return columns_to_rename
     
     def analyze_duplicates(self) -> None:
+
+        user_wants_to_analyze_duplicates: bool = get_user_confirmation(message="[*] Would you like to analyze duplicates? [Y/n]: ", true_options=["yes", "y", ""], false_options=["no", "n"])
+        
+        if not user_wants_to_analyze_duplicates:
+            return
         
         subset_for_dup_identification: list[str] = prompt_selection_for_column_list(self._dataframe.columns)
 
@@ -174,17 +188,17 @@ class DataframeManager:
 
         if len(duplicate_rows) == 0:
             print("[!] There are no duplicates in this dataset with the selected subset_list.")
+            return
         else:
             print(f"\n[!] {len(duplicate_rows)} duplicate rows identified. Here is a specific example of a duplicate: ")
             self._show_duplicate_example(subset_for_dup_identification, duplicate_rows)
         
-        if len(duplicate_rows) != 0:
-            user_wants_to_remove_duplicates = get_user_confirmation(message="[*] Do you want to remove duplicates (first duplicate row is kept)? [y/N]", true_options=["y", "yes"], false_options=["n", "no", ""])
-            if user_wants_to_remove_duplicates:
-                self._remove_duplicates(subset_for_dup_identification)
-                print("[!] Duplicates removed!")
-            else:
-                print("[!] Duplicates kept!")
+        user_wants_to_remove_duplicates = get_user_confirmation(message="[*] Do you want to remove duplicates (first duplicate row is kept)? [y/N]", true_options=["y", "yes"], false_options=["n", "no", ""])
+        if user_wants_to_remove_duplicates:
+            self._remove_duplicates(subset_for_dup_identification)
+            print("[!] Duplicates removed!")
+        else:
+            print("[!] Duplicates kept!")
             
     def _return_duplicates(self, subset_list: list[str]) -> pd.DataFrame:
         return self._dataframe.loc[self._dataframe.duplicated(subset=subset_list, keep=False)]
