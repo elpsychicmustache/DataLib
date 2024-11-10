@@ -201,11 +201,8 @@ class DataframeManager:
             print("[-] Index has not been reset.")
 
     def analyze_nulls(self) -> None:
-        # TODO: Flesh out this step more.
-            #   Provide columns that have null values
-            #       Show dtypes, % of missing values, and recommended actions(5-10 impute, 30+ don't impute)
-            #   Finally, ask if user wants to remove (rows or simply column), impute (mean, median, mode, or forward-fill [or N/A for string data]), or leave as null
-            #
+        # TODO: ask if user wants to remove (rows or simply column), impute (mean, median, mode, or forward-fill [or N/A for string data]), or do nothing
+            
         user_wants_to_analyze_nulls = get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"])
         
         null_columns: list[str] = []
@@ -237,12 +234,27 @@ class DataframeManager:
         high_perc_flag: bool = percentage_null > 0.3
         
         if str(column_data.dtype)[0] == 'o':
-            most_common_value = column_data.value_counts().index[0]
+            most_common_value: str = column_data.value_counts().index[0]
             if high_perc_flag:
-                print(f"--> string value and high percentage, possibly ignore.")
+                print("--> string value and high percentage, possibly ignore.")
             else:
-                print(f"--> string value and low percentage, possibly fill na values with most common value or as 'Unknown'.")
+                print("--> string value and low percentage, possibly fill na values with most common value or as 'Unknown'.")
             print(f"Most common value: {most_common_value}")
+
+        if str(column_data.dtype)[0] in ['i', 'f', 'u', 'c']:
+            mean_value: int|float = column_data.mean()
+            median_value: int|float = column_data.median()
+            mode_value: int|float = column_data.mode().index[0]
+            
+            if high_perc_flag:
+                print("--> int or float value and high percentage, possibly ignore.")
+            else:
+                print("--> int or float value and low percentage, possibly fill with mean, median, mode, or forward fill.")
+            print(f"Mean: {mean_value}, median: {median_value}, mode: {mode_value}")
+
+        else:
+            print(f"--> Data type not recognized: {column_data.dtype}")
+            
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
@@ -250,3 +262,4 @@ class DataframeManager:
     @property
     def dataframe(self) -> pd.DataFrame:
         return self._dataframe
+    
