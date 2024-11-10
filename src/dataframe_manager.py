@@ -221,41 +221,49 @@ class DataframeManager:
 
         return columns_with_nulls
     
-    def _show_ratio_of_nulls(self, null_columns: list[str]):
+    def _show_ratio_of_nulls(self, null_columns: list[str]) -> None:
         num_rows: int = self._dataframe.shape[0]
 
         print("======= Percentage of null values in each column =======")
         for column in null_columns:
             perc_null: float = self._dataframe[column].isnull().sum() / num_rows
             print(f"[!] {column} {'{:.2%}'.format(perc_null)} ", end="")
-            self._show_recommendation(self._dataframe[column], perc_null)
+            self._determine_recommendation(self._dataframe[column], perc_null)
 
-    def _show_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
-        high_perc_flag: bool = percentage_null > 0.3
+    def _determine_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
+        # TODO: Provide recommendation to handle date types.
         
-        if str(column_data.dtype)[0] == 'o':
-            most_common_value: str = column_data.value_counts().index[0]
-            if high_perc_flag:
-                print("--> string value and high percentage, possibly ignore.")
-            else:
-                print("--> string value and low percentage, possibly fill na values with most common value or as 'Unknown'.")
-            print(f"Most common value: {most_common_value}")
+        high_perc_flag: bool = percentage_null > 0.3
+        dtype_as_string: str = str(column_data.dtype)[0]
 
-        if str(column_data.dtype)[0] in ['i', 'f', 'u', 'c']:
+        if dtype_as_string == 'o':
+            most_common_value: str = column_data.value_counts().index[0]
+            self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
+            print(f"\tMost common value: {most_common_value}")
+        elif dtype_as_string in ['i', 'f', 'u', 'c']:
             mean_value: int|float = column_data.mean()
             median_value: int|float = column_data.median()
             mode_value: int|float = column_data.mode().index[0]
-            
-            if high_perc_flag:
-                print("--> int or float value and high percentage, possibly ignore.")
-            else:
-                print("--> int or float value and low percentage, possibly fill with mean, median, mode, or forward fill.")
-            print(f"Mean: {mean_value}, median: {median_value}, mode: {mode_value}")
-
+            self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
+            print(f"\tMean: {mean_value}, median: {median_value}, mode: {mode_value}")
         else:
-            print(f"--> Data type not recognized: {column_data.dtype}")
-            
+            print(f"--> No recommendations for: {column_data.dtype}.")
 
+    def _show_recommendation(self, column_type: str, high_perc_flag: bool) -> None:
+
+        # TODO: validate user input with column_type - it should only contain ['o', 'i', 'f', 'u', 'c']
+        # Will only be passed string object or numeric type - so these are the only types to analyze
+        if column_type == 'o':
+            if high_perc_flag:
+                    print("--> String value and high percentage of nulls, possibly ignore.")
+            else:
+                print("--> String value and low percentage of nulls, possibly fill na values with most common value or as 'Unknown'.")
+        else:
+            if high_perc_flag:
+                print("--> Numeric value and high percentage of nulls, possibly ignore.")
+            else:
+                print("--> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
+            
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
 
