@@ -172,7 +172,7 @@ class DataframeManager:
             return
         else:
             print(f"\n[!] {len(duplicate_rows)} duplicate rows identified. Here is a specific example of a duplicate: ")
-            self._show_duplicate_example(subset_for_dup_identification, duplicate_rows)
+            self._show_duplicate_example(duplicate_examples=duplicate_rows, subset_list=subset_for_dup_identification)
         
         user_wants_to_remove_duplicates = get_user_confirmation(message="[*] Do you want to remove duplicates (first duplicate row is kept)? [y/N]", true_options=["y", "yes"], false_options=["n", "no", ""])
         if user_wants_to_remove_duplicates:
