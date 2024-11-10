@@ -88,14 +88,15 @@ class DataframeManager:
             self.rename_columns_interactively()
         
         if not ignore_dtypes:
-            # TODO: Flesh out this step more.
             print("\n[!] Starting d-types step:")
+            # TODO: Flesh out this step more.
+            #   Show user columns and dtypes
+            #   Ask if user wants to change any column's dtypes (mainly datetime, ints, or floats)
             self._explain_dtypes()
         
         if not ignore_nulls:
             print("\n[!] Starting null analysis step:")
-            # TODO: Flesh out this step more.
-            self._show_null_values()
+            self.analyze_nulls()
 
         if not ignore_dups:
             print("\n[!] Starting duplicate analysis step:")
@@ -199,6 +200,13 @@ class DataframeManager:
         else:
             print("[-] Index has not been reset.")
 
+    def analyze_nulls(self) -> None:
+        # TODO: Flesh out this step more.
+            #   Provide columns that have null values
+            #       Show dtypes, % of missing values, and recommended actions(5-10 impute, 30+ don't impute)
+            #   Finally, ask if user wants to remove (rows or simply column), impute (mean, median, mode, or forward-fill [or N/A for string data]), or leave as null
+            #
+        self._show_null_values()
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
