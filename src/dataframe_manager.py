@@ -153,6 +153,8 @@ class DataframeManager:
             print("[-] No columns renamed!")
     
     def analyze_duplicates(self) -> None:
+        """Provides the user a way to analyze and handle the duplicate values of the dataframe.
+        """
 
         user_wants_to_analyze_duplicates: bool = get_user_confirmation(message="[*] Would you like to analyze duplicates? [Y/n]: ", true_options=["yes", "y", ""], false_options=["no", "n"])
         
@@ -179,10 +181,24 @@ class DataframeManager:
         else:
             print("[!] Duplicates kept!")
             
-    def _return_duplicates(self, subset_list: list[str]) -> pd.DataFrame:
+    def _return_duplicates(self, subset_list: list[str]=None) -> pd.DataFrame:
+        """Returns a dataframe with all duplicate rows identified.
+
+        Args:
+            subset_list (list[str], optional): The columns to consider duplicates. Defaults to None.
+
+        Returns:
+            pd.DataFrame: A dataframe consisting of only duplicate values.
+        """
         return self._dataframe.loc[self._dataframe.duplicated(subset=subset_list, keep=False)]
     
-    def _show_duplicate_example(self, subset_list: list[str], duplicate_examples: pd.DataFrame) -> None:
+    def _show_duplicate_example(self, duplicate_examples: pd.DataFrame, subset_list: list[str]=None) -> None:
+        """Provides the user a simple example of duplicate rows from the dataframe.
+
+        Args:
+            subset_list (list[str]): The list of column names to consider duplicates. Default to None.
+            duplicate_examples (pd.DataFrame): A dataframe consisting of duplicate values.
+        """
         
         column_values: list[str] = [duplicate_examples.iloc[0][column] for column in subset_list]
 
@@ -195,10 +211,17 @@ class DataframeManager:
 
         print(query_results)
 
-    def _remove_duplicates(self, subset_list: list[str]) -> None:
+    def _remove_duplicates(self, subset_list: list[str]=None) -> None:
+        """Removes duplicate values, keeping the first value.
+
+        Args:
+            subset_list (list[str]): The list of columns to consider duplicates. Defaults to None.
+        """
         self._dataframe = self._dataframe.drop_duplicates(subset=subset_list, keep="first")
 
     def _reset_index(self) -> None:
+        """Allows the user to reset the index of the dataframe..
+        """
         user_wants_index_rest: bool = get_user_confirmation(message="[*] Would you like to reset the index? [Y/n]", true_options=["yes", "y", ""], false_options=["no", "n"])
         if user_wants_index_rest:
             self._dataframe = self._dataframe.reset_index(drop=True)
@@ -222,12 +245,22 @@ class DataframeManager:
             self._show_ratio_of_nulls(null_columns)
 
     def _find_columns_with_nulls(self) -> list[str]:
+        """Provides a list of columns that contain null values.
+
+        Returns:
+            list[str]: List of columns that contain null values.
+        """
         columns_with_nulls_series: pd.Series = self._dataframe.isnull().sum()
         columns_with_nulls: list[str] = list(columns_with_nulls_series.loc[columns_with_nulls_series != 0].index)
 
         return columns_with_nulls
     
     def _show_ratio_of_nulls(self, null_columns: list[str]) -> None:
+        """Prints out each column, shows the % of rows that are null, and then provides a recommendation on what to do with the null values.
+
+        Args:
+            null_columns (list[str]): The list of columns that contain null values.
+        """
         num_rows: int = self._dataframe.shape[0]
 
         print("======= Percentage of null values in each column =======")
@@ -237,6 +270,12 @@ class DataframeManager:
             self._determine_recommendation(self._dataframe[column], perc_null)
 
     def _determine_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
+        """Prints to the user some simple recommendations on what to do based on data type and what % of rows are null.
+
+        Args:
+            column_data (pd.Series): A pandas series containing a column's values.
+            percentage_null (float): The percentage of values that are null (in decimal form).
+        """
         # TODO: Provide recommendation to handle date types.
         
         high_perc_flag: bool = percentage_null > 0.3
@@ -256,6 +295,12 @@ class DataframeManager:
             print(f"--> No recommendations for: {column_data.dtype}.")
 
     def _show_recommendation(self, column_type: str, high_perc_flag: bool) -> None:
+        """Provides the simple logic on what to show user for recommendations.
+
+        Args:
+            column_type (str): Must be of type "o", "i", "f", "u", or "c"
+            high_perc_flag (bool): A flag used if the percentage is 30 or greater.
+        """
 
         validate_argument(valid_arg_options=["o", "i", "f", "u", "c"], user_input=column_type, parameter_name="column_type")
 
