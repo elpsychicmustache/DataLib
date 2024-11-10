@@ -70,7 +70,7 @@ class DataframeManager:
     def _show_null_values(self):
         """Prints how many null values appear in each column.
         """
-        print(f"======= Null values in each column ======= \n")
+        print("======= Null values in each column ======= \n")
         print(f"{self._dataframe.isna().sum()}")
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
@@ -206,7 +206,31 @@ class DataframeManager:
             #       Show dtypes, % of missing values, and recommended actions(5-10 impute, 30+ don't impute)
             #   Finally, ask if user wants to remove (rows or simply column), impute (mean, median, mode, or forward-fill [or N/A for string data]), or leave as null
             #
-        self._show_null_values()
+        user_wants_to_analyze_nulls = get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"])
+        
+        null_columns: list[str] = []
+        if user_wants_to_analyze_nulls:
+            self._show_null_values()
+            null_columns = self._find_columns_with_nulls()
+
+        print()  # making output a bit niver
+
+        if null_columns:
+            self._show_ratio_of_nulls(null_columns)
+
+    def _find_columns_with_nulls(self) -> list[str]:
+        columns_with_nulls_series: pd.Series = self._dataframe.isnull().sum()
+        columns_with_nulls: list[str] = list(columns_with_nulls_series.loc[columns_with_nulls_series != 0].index)
+
+        return columns_with_nulls
+    
+    def _show_ratio_of_nulls(self, null_columns: list[str]):
+        num_rows: int = self._dataframe.shape[0]
+
+        print("======= Percentage of null values in each column =======")
+        for column in null_columns:
+            print(f"[!] {column} {'{:.2%}'.format(self._dataframe[column].isnull().sum() / num_rows)}")
+            # TODO: Add recommendation.
 
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
