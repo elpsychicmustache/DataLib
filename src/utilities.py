@@ -44,7 +44,7 @@ def prompt_selection_for_column_list(message: str, list_of_options: list[str], d
     
     # TODO: move to validate_input
     print(message)
-    user_selection_str = str(input("Numbers should be separated by spaces. Leave blank to select all columns: "))
+    user_selection_str = str(input("Numbers should be separated by spaces: "))
     if user_selection_str == "":
         user_selection_list = []
     else:
