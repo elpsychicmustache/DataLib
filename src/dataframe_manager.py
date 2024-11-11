@@ -274,22 +274,35 @@ class DataframeManager:
             column_data (pd.Series): A pandas series containing a column's values.
             percentage_null (float): The percentage of values that are null (in decimal form).
         """
-        
-        high_perc_flag: bool = percentage_null > 0.3
-        dtype_as_string: str = str(column_data.dtype)[0]
 
-        if dtype_as_string == 'o':
-            most_common_value: str = column_data.value_counts().index[0]
-            self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
-            print(f"\tMost common value: {most_common_value}")
-        elif dtype_as_string in ['i', 'f', 'u', 'c']:
-            mean_value: int|float = column_data.mean()
-            median_value: int|float = column_data.median()
-            mode_value: int|float = column_data.mode()[0]
-            self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
-            print(f"\tMean: {mean_value}, median: {median_value}, mode: {mode_value}")
-        else:
-            print(f"--> No recommendations for: {column_data.dtype}.")
+        dtype_as_string: str = str(column_data.dtype)[0]
+        high_perc_flag: bool = percentage_null > 0.3
+
+        recommendation_func: dict[str, callable] = {
+            'o': self._recommend_for_object_column,
+            'i': self._recommend_for_numeric_column,
+            'f': self._recommend_for_numeric_column,
+            'u': self._recommend_for_numeric_column,
+            'c': self._recommend_for_numeric_column,
+        }.get(dtype_as_string, self._no_recommendation)
+
+        # using dictionary to call appropriate function
+        recommendation_func(dtype_as_string, column_data, high_perc_flag)
+
+    def _recommend_for_numeric_column(self, column_dtype: str, column_data: pd.Series, high_perc_flag: bool) -> None:
+        mean_value: int|float = column_data.mean()
+        median_value: int|float = column_data.median()
+        mode_value: int|float = column_data.mode()[0]
+        self._show_recommendation(column_type=column_dtype, high_perc_flag=high_perc_flag)
+        print(f"\tMean: {mean_value}, median: {median_value}, mode: {mode_value}")
+
+    def _recommend_for_object_column(self, column_dtype: str, column_data: pd.Series, high_perc_flag: bool) -> None:
+        most_common_value: str = column_data.value_counts().index[0]
+        self._show_recommendation(column_type=column_dtype, high_perc_flag=high_perc_flag)
+        print(f"\tMost common value: {most_common_value}")
+
+    def _no_recommendation(self, column_dtype: str, column_data: pd.Series, high_perc_flag: bool) -> None:
+        print(f"--> No recommendations for: {column_dtype}.")
 
     def _show_recommendation(self, column_type: str, high_perc_flag: bool) -> None:
         """Provides the simple logic on what to show user for recommendations.
