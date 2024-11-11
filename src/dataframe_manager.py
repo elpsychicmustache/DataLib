@@ -230,20 +230,19 @@ class DataframeManager:
             print("[-] Index has not been reset.")
 
     def analyze_nulls(self) -> None:
-        # TODO: ask if user wants to remove (rows or simply column), impute (mean, median, mode, or forward-fill [or N/A for string data]), or do nothing
             
-        user_wants_to_analyze_nulls = get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"])
+        should_analyze_nulls = get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"])
         
-        null_columns: list[str] = []
-        if user_wants_to_analyze_nulls:
+        columns_with_null: list[str] = []
+        if should_analyze_nulls:
             self._show_null_values()
-            null_columns = self._find_columns_with_nulls()
+            columns_with_null = self._find_columns_with_nulls()
 
         print()  # making output a bit nicer
 
-        if null_columns:
-            self._show_ratio_of_nulls(null_columns=null_columns)
-            self._prompt_handle_nulls(columns_with_null=null_columns)
+        if columns_with_null:
+            self._show_ratio_of_nulls(columns_with_null=columns_with_null)
+            self._prompt_handle_nulls(columns_with_null=columns_with_null)
 
     def _find_columns_with_nulls(self) -> list[str]:
         """Provides a list of columns that contain null values.
@@ -256,7 +255,7 @@ class DataframeManager:
 
         return columns_with_nulls
     
-    def _show_ratio_of_nulls(self, null_columns: list[str]) -> None:
+    def _show_ratio_of_nulls(self, columns_with_null: list[str]) -> None:
         """Prints out each column, shows the % of rows that are null, and then provides a recommendation on what to do with the null values.
 
         Args:
@@ -265,10 +264,10 @@ class DataframeManager:
         num_rows: int = self._dataframe.shape[0]
 
         print("======= Percentage of null values in each column =======")
-        for column in null_columns:
-            perc_null: float = self._dataframe[column].isnull().sum() / num_rows
-            print(f"[!] {column} {'{:.2%}'.format(perc_null)} ", end="")
-            self._determine_recommendation(self._dataframe[column], perc_null)
+        for column in columns_with_null:
+            null_percentage: float = self._dataframe[column].isnull().sum() / num_rows
+            print(f"[!] {column} {'{:.2%}'.format(null_percentage)} ", end="")
+            self._determine_recommendation(self._dataframe[column], null_percentage)
 
     def _determine_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
         """Prints to the user some simple recommendations on what to do based on data type and what % of rows are null.
@@ -277,7 +276,6 @@ class DataframeManager:
             column_data (pd.Series): A pandas series containing a column's values.
             percentage_null (float): The percentage of values that are null (in decimal form).
         """
-        # TODO: Provide recommendation to handle date types.
         
         high_perc_flag: bool = percentage_null > 0.3
         dtype_as_string: str = str(column_data.dtype)[0]
@@ -326,7 +324,6 @@ class DataframeManager:
     
     def _handle_nulls(self, list_of_columns: list[str]) -> None:
         
-        # TODO: Handle the column based on user input.
         for column in list_of_columns:
             print(f"[*] What would you like to do with column {column}?")
             user_selection = int(input("0. Do nothing, 1. Replace with mean, 2. Replace with median, 3. Replace with mode (or most common value), 4. Forward fill, 5. Remove entire column, 6. Remove all rows that contain null values"))
