@@ -231,36 +231,31 @@ class DataframeManager:
 
     def analyze_nulls(self) -> None:
             
-        should_analyze_nulls = get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"])
-        
-        columns_with_null: list[str] = []
-        if should_analyze_nulls:
+        if get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"]):
             self._show_null_values()
-            columns_with_null = self._find_columns_with_nulls()
-
-        print()  # making output a bit nicer
-
-        if columns_with_null:
-            self._show_ratio_of_nulls(columns_with_null=columns_with_null)
+            columns_with_null: list[str] = self._get_columns_with_null()
+            print()  # making output a bit nicer
+            self._display_null_ratios(columns_with_null=columns_with_null)
             self._prompt_handle_nulls(columns_with_null=columns_with_null)
 
-    def _find_columns_with_nulls(self) -> list[str]:
+    def _get_columns_with_null(self) -> list[str]:
         """Provides a list of columns that contain null values.
 
         Returns:
             list[str]: List of columns that contain null values.
         """
         columns_with_nulls_series: pd.Series = self._dataframe.isnull().sum()
-        columns_with_nulls: list[str] = list(columns_with_nulls_series.loc[columns_with_nulls_series != 0].index)
-
-        return columns_with_nulls
+        return list(columns_with_nulls_series.loc[columns_with_nulls_series != 0].index)
     
-    def _show_ratio_of_nulls(self, columns_with_null: list[str]) -> None:
+    def _display_null_ratios(self, columns_with_null: list[str]) -> None:
         """Prints out each column, shows the % of rows that are null, and then provides a recommendation on what to do with the null values.
 
         Args:
             null_columns (list[str]): The list of columns that contain null values.
         """
+        if not columns_with_null:
+            return
+        
         num_rows: int = self._dataframe.shape[0]
 
         print("======= Percentage of null values in each column =======")
@@ -315,6 +310,9 @@ class DataframeManager:
                 print("--> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
             
     def _prompt_handle_nulls(self, columns_with_null: list[str]):
+
+        if not columns_with_null:
+            return
         
         column_list = prompt_selection_for_column_list(message="[*] Please enter the numbers next to the columns you want to handle null values for. Leaving blank skips this step.", list_of_options=columns_with_null, default_all=False)
         
