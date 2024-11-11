@@ -261,8 +261,11 @@ class DataframeManager:
         print("======= Percentage of null values in each column =======")
         for column in columns_with_null:
             null_percentage: float = self._dataframe[column].isnull().sum() / num_rows
-            print(f"[!] {column} {'{:.2%}'.format(null_percentage)} ", end="")
+            self._print_column_null_summary(column_name=column, null_percentage=null_percentage)
             self._determine_recommendation(self._dataframe[column], null_percentage)
+
+    def _print_column_null_summary(self, column_name: str, null_percentage: float) -> None:
+        print(f"[!] {column_name} {'{:.2%}'.format(null_percentage)}", end="")
 
     def _determine_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
         """Prints to the user some simple recommendations on what to do based on data type and what % of rows are null.
