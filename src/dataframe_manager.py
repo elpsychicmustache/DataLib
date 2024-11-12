@@ -7,7 +7,7 @@
 import pandas as pd
 
 from .validate_input import get_user_confirmation, validate_argument
-from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename
+from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename, prompt_user_for_int
 
 
 class DataframeManager:
@@ -236,6 +236,7 @@ class DataframeManager:
             columns_with_null: list[str] = self._get_columns_with_null()
             print()  # making output a bit nicer
             self._display_null_ratios(columns_with_null=columns_with_null)
+            print()
             self._prompt_handle_nulls(columns_with_null=columns_with_null)
 
     def _get_columns_with_null(self) -> list[str]:
@@ -346,12 +347,20 @@ class DataframeManager:
         Args:
             list_of_columns (list[str]): The list of columns to change.
         """
+
+        options: dict[int, str] = {
+            0: "Do nothing",
+            1: "Replace with mean",
+            2: "Replace with median",
+            3: "Replace with mode (or most common value)",
+            4: "Forward fill", 
+            5: "Remove entire column",
+            6: "Remove all rows that contain null values: "
+        }
         
         for column in list_of_columns:
-            # TODO: move following block to utilities
-            print(f"[*] What would you like to do with column {column}?")
-            user_selection: int = int(input("0. Do nothing \n1. Replace with mean \n2. Replace with median \n3. Replace with mode (or most common value) \n4. Forward fill \n5. Remove entire column \n6. Remove all rows that contain null values: "))
-
+            user_selection: int = prompt_user_for_int(message=f"[*] What would you like to do with column {column}?", options=options)
+            
             if user_selection == 0:
                 print("[!] Doing nothing.")
                 pass
