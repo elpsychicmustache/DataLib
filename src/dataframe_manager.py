@@ -334,39 +334,59 @@ class DataframeManager:
         
         if column_list:
             # TODO: Program will ask what type of action user would like to perfrom on each column.
-            self._handle_nulls(list_of_columns=column_list)
+            self._ask_how_to_handle_null(list_of_columns=column_list)
     
-    def _handle_nulls(self, list_of_columns: list[str]) -> None:
+    def _ask_how_to_handle_null(self, list_of_columns: list[str]) -> None:
         
         for column in list_of_columns:
+            # TODO: move following block to utilities
             print(f"[*] What would you like to do with column {column}?")
-            user_selection = int(input("0. Do nothing, 1. Replace with mean, 2. Replace with median, 3. Replace with mode (or most common value), 4. Forward fill, 5. Remove entire column, 6. Remove all rows that contain null values"))
+            user_selection = int(input("0. Do nothing \n1. Replace with mean \n2. Replace with median \n3. Replace with mode (or most common value) \n4. Forward fill \n5. Remove entire column \n6. Remove all rows that contain null values: "))
 
             if user_selection == 0:
                 print("[!] Doing nothing.")
                 pass
             elif user_selection == 1:
-                mean = self._dataframe[column].mean()
-                print(f"[!] Replacing null values with the mean {mean}")
-                self._dataframe[column] = self._dataframe[column].fillna(mean)
+                self._replace_with_mean_median_mode(column=column, method="mean")
             elif user_selection == 2:
-                median = self._dataframe[column].median()
-                print(f"[!] Replacing null values with the median {median}")
-                self._dataframe[column] = self._dataframe[column].fillna(median)
+                self._replace_with_mean_median_mode(column=column, method="median")
             elif user_selection == 3:
-                mode = self._dataframe[column].mode()[0]
-                print(f"[!] Replacing null values with the mode {mode}")
-                self._dataframe[column] = self._dataframe[column].fillna(mode)
+                self._replace_with_mean_median_mode(column=column, method="mode")
             elif user_selection == 4:
-                print("[!] Replacing null values with forward filling.")
-                self._dataframe[column] = self._dataframe[column].fillna(method="ffill")
+                self._replace_with_ffill()
             elif user_selection == 5:
-                print(f"[!] Removing column {column}")
-                self.dataframe = self._dataframe.drop(columns=[column])
+                self._drop_nulls(column=column, axis=1)
             elif user_selection == 6:
-                print(f"[!] Removing all rows that contain null values in {column}")
-                self.dataframe = self._dataframe.dropna(subset=[column])
+                self._drop_nulls(column=column, axis=0)
+                
+    # Replacement suite
+    def _replace_with_mean_median_mode(self, column: str, method: str) -> None:
+        if method == "mean":
+            mean = self._dataframe[column].mean()
+            print(f"[!] Replacing null values with the mean {mean}")
+            self._dataframe[column] = self._dataframe[column].fillna(mean)
+        elif method == "median":
+            median = self._dataframe[column].median()
+            print(f"[!] Replacing null values with the median {median}")
+            self._dataframe[column] = self._dataframe[column].fillna(median)
+        elif method == "mode":
+            mode = self._dataframe[column].mode()[0]
+            print(f"[!] Replacing null values with the mode {mode}")
+            self._dataframe[column] = self._dataframe[column].fillna(mode)
 
+    def _replace_with_ffill(self, column: str) -> None:
+        print("[!] Replacing null values with forward filling.")
+        self._dataframe[column] = self._dataframe[column].fillna(method="ffill")
+
+    def _drop_nulls(self, column: str, axis: int) -> None:
+        if axis == 0:
+            print(f"[!] Removing all rows that contain null values in {column}")
+            self.dataframe = self._dataframe.dropna(subset=[column])
+        elif axis == 1:
+            print(f"[!] Removing column {column}")
+            self.dataframe = self._dataframe.drop(columns=[column])
+    # End replacement suite
+            
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
 
