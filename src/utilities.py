@@ -71,3 +71,17 @@ def prompt_for_columns_to_rename(list_of_rename_items: list[str]) -> dict[str, s
             columns_to_rename[column] = new_column_name
 
     return columns_to_rename
+
+
+def prompt_user_for_int(message: str, options: dict[int, str]) -> int:
+
+    print(message)
+    for key, value in options.items():
+        print(f"{key}: {value}")
+    
+    user_input: int = int(input())
+
+    if user_input in options:
+        return user_input
+    else:
+        raise ValueError(f"{user_input} is not a valid option from {list(options.keys())}")  # casting as list is needed for proper output

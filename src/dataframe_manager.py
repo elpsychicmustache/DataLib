@@ -6,6 +6,8 @@
 
 import pandas as pd
 
+from .duplicate_analyzer import DuplicateAnalyzer
+from .null_analyzer import NullAnalyzer
 from .validate_input import get_user_confirmation, validate_argument
 from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename
 
@@ -27,7 +29,7 @@ class DataframeManager:
         else:
             self._dataframe: pd.DataFrame = get_df_from_csv(file_path, file_name, date_columns, column_names)
         
-    def understand_data(self, head_tail_size: int = 20, analysis_type="short") -> None:
+    def understand_data(self, head_tail_size: int=20, analysis_type="short") -> None:
         """Step one of Exploratory data anlysis. Prints some information to help understand the dataframe.
 
         Args:
@@ -156,68 +158,17 @@ class DataframeManager:
         """Provides the user a way to analyze and handle the duplicate values of the dataframe.
         """
 
-        user_wants_to_analyze_duplicates: bool = get_user_confirmation(message="[*] Would you like to analyze duplicates? [Y/n]: ", true_options=["yes", "y", ""], false_options=["no", "n"])
-        
-        if not user_wants_to_analyze_duplicates:
-            print("[-] Duplicate analysis step skipped.")
-            return
-        
-        subset_for_dup_identification: list[str] = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column to use as subsets to find duplicates.", list_of_options=self._dataframe.columns)
-
-        print(f"[!] Looking for duplicates in columns: {subset_for_dup_identification} ...")
-        duplicate_rows = self._return_duplicates(subset_for_dup_identification)
-
-        if len(duplicate_rows) == 0:
-            print("[!] There are no duplicates in this dataset with the selected subset_list.")
-            return
-        else:
-            print(f"\n[!] {len(duplicate_rows)} duplicate rows identified. Here is a specific example of a duplicate: ")
-            self._show_duplicate_example(subset_for_dup_identification, duplicate_rows)
-        
-        user_wants_to_remove_duplicates = get_user_confirmation(message="[*] Do you want to remove duplicates (first duplicate row is kept)? [y/N]", true_options=["y", "yes"], false_options=["n", "no", ""])
-        if user_wants_to_remove_duplicates:
-            self._remove_duplicates(subset_for_dup_identification)
-            print("[!] Duplicates removed!")
-        else:
-            print("[!] Duplicates kept!")
+        duplicate_analyzer = DuplicateAnalyzer(self._dataframe)
+        self._dataframe = duplicate_analyzer.dataframe
+        del duplicate_analyzer
             
-    def _return_duplicates(self, subset_list: list[str]=None) -> pd.DataFrame:
-        """Returns a dataframe with all duplicate rows identified.
-
-        Args:
-            subset_list (list[str], optional): The columns to consider duplicates. Defaults to None.
-
-        Returns:
-            pd.DataFrame: A dataframe consisting of only duplicate values.
+    def analyze_nulls(self) -> None:
+        """Passes self.dataframe object into NullAnalyzer class which handles all the null analysis logic.
+        This is to abstract some of the methods since it really polluted the DataframeManager class.
         """
-        return self._dataframe.loc[self._dataframe.duplicated(subset=subset_list, keep=False)]
-    
-    def _show_duplicate_example(self, duplicate_examples: pd.DataFrame, subset_list: list[str]=None) -> None:
-        """Provides the user a simple example of duplicate rows from the dataframe.
-
-        Args:
-            subset_list (list[str]): The list of column names to consider duplicates. Default to None.
-            duplicate_examples (pd.DataFrame): A dataframe consisting of duplicate values.
-        """
-        
-        column_values: list[str] = [duplicate_examples.iloc[0][column] for column in subset_list]
-
-        query_dict: dict[str, str] = dict(zip(subset_list, column_values))
-
-        query_results: pd.DataFrame = duplicate_examples
-
-        for column, value in query_dict.items():
-            query_results = query_results[query_results[column] == value]
-
-        print(query_results)
-
-    def _remove_duplicates(self, subset_list: list[str]=None) -> None:
-        """Removes duplicate values, keeping the first value.
-
-        Args:
-            subset_list (list[str]): The list of columns to consider duplicates. Defaults to None.
-        """
-        self._dataframe = self._dataframe.drop_duplicates(subset=subset_list, keep="first")
+        null_analyzer = NullAnalyzer(self._dataframe)
+        self._dataframe = null_analyzer.dataframe
+        del null_analyzer
 
     def _reset_index(self) -> None:
         """Allows the user to reset the index of the dataframe..
@@ -228,92 +179,6 @@ class DataframeManager:
             print("[+] Index has been reset!")
         else:
             print("[-] Index has not been reset.")
-
-    def analyze_nulls(self) -> None:
-        # TODO: ask if user wants to remove (rows or simply column), impute (mean, median, mode, or forward-fill [or N/A for string data]), or do nothing
-            
-        user_wants_to_analyze_nulls = get_user_confirmation(message="[*] Would you like to analyze null values? [Y/n] ", true_options=["yes", "y", ""], false_options=["no", "n"])
-        
-        null_columns: list[str] = []
-        if user_wants_to_analyze_nulls:
-            self._show_null_values()
-            null_columns = self._find_columns_with_nulls()
-
-        print()  # making output a bit niver
-
-        if null_columns:
-            self._show_ratio_of_nulls(null_columns)
-
-    def _find_columns_with_nulls(self) -> list[str]:
-        """Provides a list of columns that contain null values.
-
-        Returns:
-            list[str]: List of columns that contain null values.
-        """
-        columns_with_nulls_series: pd.Series = self._dataframe.isnull().sum()
-        columns_with_nulls: list[str] = list(columns_with_nulls_series.loc[columns_with_nulls_series != 0].index)
-
-        return columns_with_nulls
-    
-    def _show_ratio_of_nulls(self, null_columns: list[str]) -> None:
-        """Prints out each column, shows the % of rows that are null, and then provides a recommendation on what to do with the null values.
-
-        Args:
-            null_columns (list[str]): The list of columns that contain null values.
-        """
-        num_rows: int = self._dataframe.shape[0]
-
-        print("======= Percentage of null values in each column =======")
-        for column in null_columns:
-            perc_null: float = self._dataframe[column].isnull().sum() / num_rows
-            print(f"[!] {column} {'{:.2%}'.format(perc_null)} ", end="")
-            self._determine_recommendation(self._dataframe[column], perc_null)
-
-    def _determine_recommendation(self, column_data: pd.Series, percentage_null: float) -> None:
-        """Prints to the user some simple recommendations on what to do based on data type and what % of rows are null.
-
-        Args:
-            column_data (pd.Series): A pandas series containing a column's values.
-            percentage_null (float): The percentage of values that are null (in decimal form).
-        """
-        # TODO: Provide recommendation to handle date types.
-        
-        high_perc_flag: bool = percentage_null > 0.3
-        dtype_as_string: str = str(column_data.dtype)[0]
-
-        if dtype_as_string == 'o':
-            most_common_value: str = column_data.value_counts().index[0]
-            self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
-            print(f"\tMost common value: {most_common_value}")
-        elif dtype_as_string in ['i', 'f', 'u', 'c']:
-            mean_value: int|float = column_data.mean()
-            median_value: int|float = column_data.median()
-            mode_value: int|float = column_data.mode().index[0]
-            self._show_recommendation(column_type=dtype_as_string, high_perc_flag=high_perc_flag)
-            print(f"\tMean: {mean_value}, median: {median_value}, mode: {mode_value}")
-        else:
-            print(f"--> No recommendations for: {column_data.dtype}.")
-
-    def _show_recommendation(self, column_type: str, high_perc_flag: bool) -> None:
-        """Provides the simple logic on what to show user for recommendations.
-
-        Args:
-            column_type (str): Must be of type "o", "i", "f", "u", or "c"
-            high_perc_flag (bool): A flag used if the percentage is 30 or greater.
-        """
-
-        validate_argument(valid_arg_options=["o", "i", "f", "u", "c"], user_input=column_type, parameter_name="column_type")
-
-        if column_type == 'o':
-            if high_perc_flag:
-                    print("--> String value and high percentage of nulls, possibly ignore.")
-            else:
-                print("--> String value and low percentage of nulls, possibly fill na values with most common value or as 'Unknown'.")
-        else:
-            if high_perc_flag:
-                print("--> Numeric value and high percentage of nulls, possibly ignore.")
-            else:
-                print("--> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
             
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
