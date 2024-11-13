@@ -9,7 +9,7 @@ import pandas as pd
 from .duplicate_analyzer import DuplicateAnalyzer
 from .null_analyzer import NullAnalyzer
 from .validate_input import get_user_confirmation, validate_argument
-from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename
+from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename, prompt_user_for_int
 
 
 class DataframeManager:
@@ -157,9 +157,9 @@ class DataframeManager:
     def analyze_dtypes(self) -> None:
         
         self._explain_dtypes()
-
+        print()
         if get_user_confirmation(
-            message="[*] Would you like to change any d-types? [y/N]", 
+            message="[*] Would you like to change any d-types? [y/N] ", 
             true_options=["y", "yes"], 
             false_options=["n", "no", ""]
             ):
@@ -168,7 +168,37 @@ class DataframeManager:
             self._ask_new_dtypes(columns=columns_to_update)
 
     def _ask_new_dtypes(self, columns:list[str]):
-        pass
+
+        if not columns:
+            return 
+        
+        options: dict[int, str] = {
+            0: "Do nothing",
+            1: "Change to datetime",
+            2: "Change to numeric",
+            3: "Change to categorical"
+        }
+
+        print()
+        for column in columns:
+            change_to_value = prompt_user_for_int(message=f"[*] What would you like to do with column {column}?", options=options)
+            
+            if change_to_value == 0:
+                print("[!] Doing nothing.")
+                pass
+            elif change_to_value == 1:
+                self._change_column_to_datetime(column_name=column)
+            elif change_to_value == 2:
+                self._change_column_to_numeric(column_name=column)
+            elif change_to_value == 3:
+                self._change_column_to_categorical(column_name=column)
+
+    def _change_column_to_datetime(self, column_name:str) -> None:
+        self._dataframe[column_name] = pd.to_datetime(self._dataframe[column_name])
+    def _change_column_to_numeric(self, column_name:str, numeric_type:str) -> None:
+        self._dataframe[column_name] = pd.to_numeric(self._dataframe[column_name])
+    def _change_column_to_categorical(self, column_name:str) -> None:
+        self._dataframe[column_name] = pd.Categorical(self._dataframe[column_name])
 
     def analyze_duplicates(self) -> None:
         """Provides the user a way to analyze and handle the duplicate values of the dataframe.
