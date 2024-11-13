@@ -153,7 +153,23 @@ class DataframeManager:
             print(f"[+] Columns have been renamed.")
         else:
             print("[-] No columns renamed!")
-    
+
+    def analyze_dtypes(self) -> None:
+        
+        self._explain_dtypes()
+
+        if get_user_confirmation(
+            message="[*] Would you like to change any d-types? [y/N]", 
+            true_options=["y", "yes"], 
+            false_options=["n", "no", ""]
+            ):
+
+            columns_to_update: list[str] = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column that you would like to rename", list_of_options=self._dataframe.columns, default_all=False)
+            self._ask_new_dtypes(columns=columns_to_update)
+
+    def _ask_new_dtypes(self, columns:list[str]):
+        pass
+
     def analyze_duplicates(self) -> None:
         """Provides the user a way to analyze and handle the duplicate values of the dataframe.
         """
