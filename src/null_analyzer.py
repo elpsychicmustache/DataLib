@@ -1,7 +1,7 @@
 # ElPsychicMustache
 # 2024-11-12
 
-# Decided to move the entire NullAnalysis step of DataframeManager.process_data step, since it is a hefty process.
+# Decided to move the entire NullAnalysis step of DataframeManager.prepare_data step, since it is a hefty process.
 #   The idea is to abstract that step a little more and make DataframeManager more clean
 
 import pandas as pd
@@ -102,7 +102,7 @@ class NullAnalyzer:
         print(f"\tMost common value: {most_common_value}")
 
     def _no_recommendation(self, column_dtype: str, column_data: pd.Series, high_perc_flag: bool) -> None:
-        print(f"--> No recommendations for: {column_dtype}.")
+        print(" --> No recommendations for this data type..")
 
     def _show_recommendation(self, column_type: str, high_perc_flag: bool) -> None:
         """Provides the simple logic on what to show user for recommendations.
@@ -116,14 +116,14 @@ class NullAnalyzer:
 
         if column_type == 'o':
             if high_perc_flag:
-                    print("--> String value and high percentage of nulls, possibly ignore.")
+                    print(" --> String value and high percentage of nulls, possibly ignore.")
             else:
-                print("--> String value and low percentage of nulls, possibly fill na values with most common value or as 'Unknown'.")
+                print(" --> String value and low percentage of nulls, possibly fill na values with most common value or as 'Unknown'.")
         else:
             if high_perc_flag:
-                print("--> Numeric value and high percentage of nulls, possibly ignore.")
+                print(" --> Numeric value and high percentage of nulls, possibly ignore.")
             else:
-                print("--> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
+                print(" --> Numeric value and low percentage of nulls, possibly fill with mean, median, mode, or forward fill.")
             
     def _prompt_handle_nulls(self, columns_with_null: list[str]):
         """Asks if the user wants to do anything to any of the null columns.

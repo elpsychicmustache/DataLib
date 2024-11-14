@@ -11,7 +11,7 @@ from .null_analyzer import NullAnalyzer
 from .validate_input import get_user_confirmation, validate_argument
 from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename, prompt_user_for_int
 
-
+# TODO: Add a pause between each step of prepare_data
 class DataframeManager:
 
     def __init__(self, dataframe: pd.DataFrame=None, file_path: str="../data/input/", file_name: str="data.csv", date_columns: list[str]=None, column_names: list[str]=None) -> None:
@@ -72,7 +72,7 @@ class DataframeManager:
     def _show_null_values(self):
         """Prints how many null values appear in each column.
         """
-        print("======= Null values in each column ======= \n")
+        print("======= Null values in each column ======= ")
         print(f"{self._dataframe.isna().sum()}")
     # END OF COLLECTION OF SIMPLE PRINT FUNCTIONS
 
@@ -93,25 +93,29 @@ class DataframeManager:
         if not skip_remove:
             print("\n[!] Starting remove columns step:")
             self.remove_columns_interactively()
+            print("[!] Remove columns step finished.")
         if not skip_rename:
             print("\n[!] Starting rename columns step:")
             self.rename_columns_interactively()
+            print("[!] Rename columns step finished.")
         if not skip_dtypes:
             print("\n[!] Starting d-types step:")
-            # TODO: Flesh out this step more.
-            #   Show user columns and dtypes
-            #   Ask if user wants to change any column's dtypes (mainly datetime, ints, or floats)
+            self.analyze_dtypes()
             self._explain_dtypes()
+            print("[!] D-types step finished.")
         
         if not skip_nulls:
             print("\n[!] Starting null analysis step:")
             self.analyze_nulls()
+            print("[!] Null step finished.")
         if not skip_dups:
             print("\n[!] Starting duplicate analysis step:")
             self.analyze_duplicates()
+            print("[!] Duplicates step finished.")
         if not skip_reset:
             print("\n[!] Starting index reset step:")
             self._reset_index()
+            print("[!] Index reset step complete!")
         
         print("\n[!] Data preparation step complete!")
 
@@ -164,7 +168,7 @@ class DataframeManager:
             false_options=["n", "no", ""]
             ):
 
-            columns_to_update: list[str] = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column that you would like to rename", list_of_options=self._dataframe.columns, default_all=False)
+            columns_to_update: list[str] = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column that you would like to change the d-type. Leaving blank skips this step.", list_of_options=self._dataframe.columns, default_all=False)
             self._ask_new_dtypes(columns=columns_to_update)
 
     def _ask_new_dtypes(self, columns:list[str]):
