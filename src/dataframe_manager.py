@@ -5,11 +5,15 @@
 # Code is a work in progress based on teachings of Rob Mulla https://youtu.be/xi0vhXFPegw?si=cicV7Pdf9NTjYBRC
 
 import pandas as pd
+import seaborn as sns
 
 from .duplicate_analyzer import DuplicateAnalyzer
+from .feature_analyzer import FeatureAnalyzer
 from .null_analyzer import NullAnalyzer
-from .validate_input import get_user_confirmation, validate_argument
+
 from .utilities import get_df_from_csv, prompt_selection_for_column_list, prompt_for_columns_to_rename, prompt_user_for_int
+from .validate_input import get_user_confirmation, validate_argument
+
 
 # TODO: Add a pause between each step of prepare_data
 class DataframeManager:
@@ -229,6 +233,10 @@ class DataframeManager:
             print("[+] Index has been reset!")
         else:
             print("[-] Index has not been reset.")
+
+    def understand_features(self):
+        print("[!] Beginning feature understanding (univariate) analysis step!")
+        feature_analyzer = FeatureAnalyzer(self._dataframe)
             
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
