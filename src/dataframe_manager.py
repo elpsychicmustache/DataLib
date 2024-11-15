@@ -237,6 +237,7 @@ class DataframeManager:
     def understand_features(self):
         print("[!] Beginning feature understanding (univariate) analysis step!")
         feature_analyzer = FeatureAnalyzer(self._dataframe)
+        del feature_analyzer
             
     def __str__(self) -> str:
         return f"This is a pandas DataFrame object. Here are the first 25 rows: {self._dataframe.head(25)}"
