@@ -45,4 +45,13 @@ class FeatureAnalyzer:
         print(f"TROUBLESHOOTING _column_dtypes: {self._column_dtypes}")  # FOR TROUBLESHOOTING - REMOVE LATER
 
     def _call_plots_from_dtypes(self):
+        if self._column_dtypes["numeric"]:
+            numeric_columns: list[str] = self._column_dtypes["numeric"]
+
+            for column in numeric_columns:
+                self._create_hist_plot(series_to_plot=self._dataframe[column])
+
+    def _create_hist_plot(self, series_to_plot: pd.Series):
         ...
+
+    
