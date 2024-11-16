@@ -53,10 +53,20 @@ class FeatureAnalyzer:
             for column in numeric_columns:
                 self._create_hist_plot(series_to_plot=self._dataframe[column])
 
+        if self._column_dtypes["string"]:
+            object_columns: list[str] = self._column_dtypes["string"]
+
+            for column in object_columns:
+                self._create_bar_plot(series_to_plot=self._dataframe[column])
+
     def _create_hist_plot(self, series_to_plot: pd.Series):
         # TODO: calculate a way to find the best bins
         ax = series_to_plot.plot.hist()
         self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
+
+    def _create_bar_plot(self, series_to_plot: pd.Series):
+        ax = series_to_plot.value_counts().head(20).plot.bar()
+        self._format_plot(ax=ax, plot_type="bar", column_name=series_to_plot.name)
 
     def _format_plot(self, ax: plt.matplotlib.axes.Axes, plot_type: str, column_name:str):
         ax.spines[["right", "top"]].set_visible(False)
