@@ -70,6 +70,8 @@ def generate_list_from_input_str(user_input:str, option_dict:dict[str,str]) -> l
             selection_list.append(option_dict[int(selection)])
         except KeyError:
             raise KeyError(f"You entered an invalid option -> {selection}")
+        except ValueError:
+            raise ValueError(f"You entered an invalid option -> {selection}")
     return selection_list
 
 
