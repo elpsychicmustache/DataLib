@@ -45,11 +45,11 @@ def show_options_to_user(message:str, option_dict:dict[str,str], default_all_fla
     output_message: str = ""
     output_message += message
     for (key, value) in option_dict.items():
-        output_message += f"{key}: {value}"
+        output_message += f"\n{key}: {value}"
     if default_all_flag:
-        output_message += "Numbers should be separated by spaces. Leaving blank selects all."
+        output_message += "\nNumbers should be separated by spaces. Leaving blank selects all."
     else:
-        output_message += "Numbers should be separated by spaces. Leaving blank skips this."
+        output_message += "\nNumbers should be separated by spaces. Leaving blank skips this."
     
     print(output_message)
 
