@@ -29,7 +29,7 @@ def prompt_selection_for_column_list(message: str, list_of_options: list[str], d
     option_dict: dict[int, str] = {i: list_of_options[i] for i in range(len(list_of_options))}
 
     show_options_to_user(message=message, option_dict=option_dict, default_all_flag=default_all)
-    user_input = get_user_input_str()
+    user_input = get_user_input_str(message="Enter options: ")
     selection_list = generate_list_from_input_str(user_input=user_input, option_dict=option_dict)
 
     if selection_list:
@@ -54,8 +54,8 @@ def show_options_to_user(message:str, option_dict:dict[str,str], default_all_fla
     print(output_message)
 
 
-def get_user_input_str() -> str:
-    user_input = str(input("Enter options: "))
+def get_user_input_str(message:str) -> str:
+    user_input = str(input(message))
     return user_input
 
 
@@ -79,8 +79,8 @@ def prompt_for_columns_to_rename(list_of_rename_items: list[str]) -> dict[str, s
     columns_to_rename: dict[str, str] = {}
 
     for column in list_of_rename_items:
-        new_column_name = str(input(f"[*] Rename column {column} to (leave blank to ignore change): ")).strip()
-
+        new_column_name: str = get_user_input_str(message=f"[*] Rename column {column} to (leave blank to ignore change): ").strip()
+        new_column_name = new_column_name.strip()
         if new_column_name != "":
             columns_to_rename[column] = new_column_name
 
