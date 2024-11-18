@@ -4,6 +4,7 @@
 # This class is used to perform the visualization of feature understanding step.
 
 import pandas as pd
+import math
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -47,11 +48,25 @@ class FeatureAnalyzer:
     def _call_plots_from_dtypes(self):
         """Takes the columns for each dtype, and then sends to the appropriate plotting method to show distribution.
         """
+        sub_plot_columns:int = 3
+
         if self._column_dtypes["numeric"]:
+            number_of_plots = len(self._column_dtypes["numeric"])
+            number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
+            current_subplot_index:int = 1
+
             numeric_columns: list[str] = self._column_dtypes["numeric"]
 
+            plt.figure(figsize=(15, 10))
+
             for column in numeric_columns:
+                plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
                 self._create_hist_plot(series_to_plot=self._dataframe[column])
+                current_subplot_index += 1
+            
+            plt.tight_layout()
+            plt.show()
+
 
         if self._column_dtypes["string"]:
             object_columns: list[str] = self._column_dtypes["string"]
@@ -59,22 +74,24 @@ class FeatureAnalyzer:
             for column in object_columns:
                 self._create_bar_plot(series_to_plot=self._dataframe[column])
 
-    def _create_hist_plot(self, series_to_plot: pd.Series):
+    def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         # TODO: calculate a way to find the best bins
         ax = series_to_plot.plot.hist()
-        self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
+        ax = self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
+        return ax
 
-    def _create_bar_plot(self, series_to_plot: pd.Series):
+    def _create_bar_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         ax = series_to_plot.value_counts().head(20).plot.bar()
-        self._format_plot(ax=ax, plot_type="bar", column_name=series_to_plot.name)
+        ax = self._format_plot(ax=ax, plot_type="bar", column_name=series_to_plot.name)
+        return ax
 
-    def _format_plot(self, ax: plt.matplotlib.axes.Axes, plot_type: str, column_name:str):
+    def _format_plot(self, ax: plt.matplotlib.axes.Axes, plot_type: str, column_name:str)  -> plt.matplotlib.axes.Axes:
         ax.spines[["right", "top"]].set_visible(False)
         if plot_type == "bar":
             ax.set_title(f"{column_name} top 20 values", loc="left")
         elif plot_type == "hist":
             ax.set_title(f"{column_name} histogram", loc="left")
         ax.set_ylabel("frequency", loc="top")
-        plt.show()
+        return ax
 
     
