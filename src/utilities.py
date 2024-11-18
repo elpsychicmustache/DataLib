@@ -93,9 +93,13 @@ def prompt_user_for_int(message: str, options: dict[int, str]) -> int:
     for key, value in options.items():
         print(f"{key}: {value}")
     
-    user_input: int = int(input())
+    user_input: int = int(get_user_input_str(message="Enter option: "))
 
+    return validate_input_is_in_options(user_input=user_input, options=options)
+    
+    
+def validate_input_is_in_options(user_input:int|str, options:dict[str|int, str]):
     if user_input in options:
         return user_input
     else:
-        raise ValueError(f"{user_input} is not a valid option from {list(options.keys())}")  # casting as list is needed for proper output
+        raise KeyError(f"{user_input} is not a valid option from {list(options.keys())}")
