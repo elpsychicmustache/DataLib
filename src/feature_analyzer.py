@@ -51,28 +51,41 @@ class FeatureAnalyzer:
         sub_plot_columns:int = 3
 
         if self._column_dtypes["numeric"]:
-            number_of_plots = len(self._column_dtypes["numeric"])
-            number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
-            current_subplot_index:int = 1
-
             numeric_columns: list[str] = self._column_dtypes["numeric"]
 
+            # prepping plotting
+            number_of_plots = len(numeric_columns)
+            number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
+            current_subplot_index:int = 1
             plt.figure(figsize=(15, 10))
 
+            # popluating plots
             for column in numeric_columns:
                 plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
                 self._create_hist_plot(series_to_plot=self._dataframe[column])
                 current_subplot_index += 1
             
+            # prints plots
             plt.tight_layout()
             plt.show()
 
 
+        # TODO: Fix display for string types
         if self._column_dtypes["string"]:
             object_columns: list[str] = self._column_dtypes["string"]
 
+            number_of_plots = len(object_columns)
+            number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
+            current_subplot_index:int = 1
+            plt.figure(figsize=(15, 10))
+
             for column in object_columns:
+                plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
                 self._create_bar_plot(series_to_plot=self._dataframe[column])
+                current_subplot_index += 1
+
+            plt.tight_layout()
+            plt.show()
 
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         # TODO: calculate a way to find the best bins
