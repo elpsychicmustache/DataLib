@@ -51,13 +51,14 @@ class FeatureAnalyzer:
         sub_plot_columns:int = 3
 
         if self._column_dtypes["numeric"]:
+            print("Creating histograms . . .")
             numeric_columns: list[str] = self._column_dtypes["numeric"]
 
             # prepping plotting
             number_of_plots = len(numeric_columns)
             number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
             current_subplot_index:int = 1
-            plt.figure(figsize=(15, 10))
+            fig = plt.figure(figsize=(15, 10))
 
             # popluating plots
             for column in numeric_columns:
@@ -66,26 +67,28 @@ class FeatureAnalyzer:
                 current_subplot_index += 1
             
             # prints plots
-            plt.tight_layout()
-            plt.show()
-
+            # plt.tight_layout()
+            fig.suptitle("Histograms")
 
         # TODO: Fix display for string types
         if self._column_dtypes["string"]:
+            print("Creating categorical plots . . .")
             object_columns: list[str] = self._column_dtypes["string"]
 
             number_of_plots = len(object_columns)
             number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
             current_subplot_index:int = 1
-            plt.figure(figsize=(15, 10))
+            fig = plt.figure(figsize=(15, 10))
 
             for column in object_columns:
                 plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
                 self._create_bar_plot(series_to_plot=self._dataframe[column])
                 current_subplot_index += 1
 
-            plt.tight_layout()
-            plt.show()
+            # plt.tight_layout()
+            fig.suptitle("Top 20 values")
+
+        plt.show()
 
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         # TODO: calculate a way to find the best bins
@@ -100,10 +103,11 @@ class FeatureAnalyzer:
 
     def _format_plot(self, ax: plt.matplotlib.axes.Axes, plot_type: str, column_name:str)  -> plt.matplotlib.axes.Axes:
         ax.spines[["right", "top"]].set_visible(False)
-        if plot_type == "bar":
-            ax.set_title(f"{column_name} top 20 values", loc="left")
-        elif plot_type == "hist":
-            ax.set_title(f"{column_name} histogram", loc="left")
+        ax.set_title(column_name, loc="left")
+        # if plot_type == "bar":
+        #     ax.set_title(f"{column_name} top 20 values", loc="left")
+        # elif plot_type == "hist":
+        #     ax.set_title(f"{column_name} histogram", loc="left")
         ax.set_ylabel("frequency", loc="top")
         return ax
 
