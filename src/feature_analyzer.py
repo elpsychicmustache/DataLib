@@ -54,47 +54,46 @@ class FeatureAnalyzer:
             print("Creating histograms . . .")
             numeric_columns: list[str] = self._column_dtypes["numeric"]
 
-            # prepping plotting
-            number_of_plots = len(numeric_columns)
-            number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
-            current_subplot_index:int = 1
-            fig = plt.figure(figsize=(15, 10))
+            data: pd.DataFrame = self._dataframe[numeric_columns].melt(value_name="value", var_name="variable")
 
-            # popluating plots
-            for column in numeric_columns:
-                plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
-                self._create_hist_plot(series_to_plot=self._dataframe[column])
-                current_subplot_index += 1
+            g = sns.FacetGrid(
+                data=data,
+                col="variable",
+                col_wrap=sub_plot_columns,
+                sharex=False,
+                sharey=False
+            )
+            g.map_dataframe(sns.histplot, x="value", bins=20)
+
+            plt.show()
             
-            # prints plots
-            # plt.tight_layout()
-            fig.suptitle("Histograms")
 
-        # TODO: Fix display for string types
-        if self._column_dtypes["string"]:
-            print("Creating categorical plots . . .")
-            object_columns: list[str] = self._column_dtypes["string"]
+        # # TODO: Fix display for string types
+        # if self._column_dtypes["string"]:
+        #     print("Creating categorical plots . . .")
+        #     object_columns: list[str] = self._column_dtypes["string"]
 
-            number_of_plots = len(object_columns)
-            number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
-            current_subplot_index:int = 1
-            fig = plt.figure(figsize=(15, 10))
+        #     number_of_plots = len(object_columns)
+        #     number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
+        #     current_subplot_index:int = 1
+        #     fig = plt.figure(figsize=(15, 10))
 
-            for column in object_columns:
-                plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
-                self._create_bar_plot(series_to_plot=self._dataframe[column])
-                current_subplot_index += 1
+        #     for column in object_columns:
+        #         plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
+        #         self._create_bar_plot(series_to_plot=self._dataframe[column])
+        #         current_subplot_index += 1
 
-            # plt.tight_layout()
-            fig.suptitle("Top 20 values")
+        #     # plt.tight_layout()
+        #     fig.suptitle("Top 20 values")
 
-        plt.show()
+        # plt.show()
 
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         # TODO: calculate a way to find the best bins
-        ax = series_to_plot.plot.hist()
-        ax = self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
-        return ax
+        # ax = series_to_plot.plot.hist()
+        # ax = self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
+        # return ax
+        pass
 
     def _create_bar_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         ax = series_to_plot.value_counts().head(20).plot.bar()
