@@ -64,29 +64,19 @@ class FeatureAnalyzer:
                 sharey=False
             )
             g.map_dataframe(sns.histplot, x="value", bins=20)
+            axes = g.axes
 
-            plt.show()
+            for ax in axes:
+                ax.set_ylabel("count", loc="top")
             
 
-        # # TODO: Fix display for string types
-        # if self._column_dtypes["string"]:
-        #     print("Creating categorical plots . . .")
-        #     object_columns: list[str] = self._column_dtypes["string"]
+        # TODO: Fix display for string types
+        if self._column_dtypes["string"]:
+            object_columns: list[str] = self._column_dtypes["string"]
 
-        #     number_of_plots = len(object_columns)
-        #     number_rows:int = int(math.ceil(number_of_plots / sub_plot_columns))
-        #     current_subplot_index:int = 1
-        #     fig = plt.figure(figsize=(15, 10))
+            data = self._dataframe[object_columns]
 
-        #     for column in object_columns:
-        #         plt.subplot(number_rows, sub_plot_columns, current_subplot_index)
-        #         self._create_bar_plot(series_to_plot=self._dataframe[column])
-        #         current_subplot_index += 1
-
-        #     # plt.tight_layout()
-        #     fig.suptitle("Top 20 values")
-
-        # plt.show()
+        plt.show()
 
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         # TODO: calculate a way to find the best bins
