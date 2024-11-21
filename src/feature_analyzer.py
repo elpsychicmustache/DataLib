@@ -49,13 +49,14 @@ class FeatureAnalyzer:
         """
 
         self._call_numeric_plots()
+        self._call_object_plots()
 
     def _call_numeric_plots(self):
-        if not get_user_confirmation(message=f"[*] Would you like to display the {len(self._column_dtypes["numeric"])} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
-            return
-        
         numeric_columns: list[str] = self._column_dtypes["numeric"]
 
+        if not get_user_confirmation(message=f"[*] Would you like to display the {len(numeric_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
+        
         figures: list = []
 
         for index, column in enumerate(numeric_columns):
@@ -65,7 +66,6 @@ class FeatureAnalyzer:
                 self._create_hist_plot(self._dataframe[column])
             elif (index % 5 == 0):
                 plt.show()
-                input = "Press enter to continue . . . "
                 figures = []  # restting figures
 
                 figures.append(plt.figure())
@@ -79,11 +79,34 @@ class FeatureAnalyzer:
         if figures:
             plt.show()
 
+    def _call_object_plots(self):
+        string_columns: list[str] = self._column_dtypes["string"]
+        if not get_user_confirmation(message=f"[*] Would you like to display the {len(string_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
+
+        figures: list = []
+
+        for index, column in enumerate(string_columns):
+            if index == 0:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+            elif (index % 5 == 0):
+                plt.show()
+                figures = []  # restting figures
+
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+            else:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+        
+        if figures:
+            plt.show()
+
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
-        # TODO: calculate a way to find the best bins
-        # ax = series_to_plot.plot.hist()
-        # ax = self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
-        # return ax
         ax = series_to_plot.plot.hist()
         ax.set_title(f"{series_to_plot.name} histogram", loc="left")
         ax.set_ylabel("frequency", loc="top")
@@ -91,18 +114,12 @@ class FeatureAnalyzer:
         return ax
 
     def _create_bar_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
-        ax = series_to_plot.value_counts().head(20).plot.bar()
-        ax = self._format_plot(ax=ax, plot_type="bar", column_name=series_to_plot.name)
+        top_20_values: pd.Series = series_to_plot.value_counts().head(20)
+        ax = top_20_values.plot.bar()
+        ax.set_title(f"{series_to_plot.name} top {len(top_20_values)} values", loc="left")  # using len(top_20_values) in case there are less than 20 values
+        ax.set_ylabel("frequency", loc="top")
+        ax.spines[["top", "right"]].set_visible(False)
         return ax
 
-    def _format_plot(self, ax: plt.matplotlib.axes.Axes, plot_type: str, column_name:str)  -> plt.matplotlib.axes.Axes:
-        ax.spines[["right", "top"]].set_visible(False)
-        ax.set_title(column_name, loc="left")
-        # if plot_type == "bar":
-        #     ax.set_title(f"{column_name} top 20 values", loc="left")
-        # elif plot_type == "hist":
-        #     ax.set_title(f"{column_name} histogram", loc="left")
-        ax.set_ylabel("frequency", loc="top")
-        return ax
 
     
