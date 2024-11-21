@@ -3,10 +3,9 @@
 
 # This class is used to perform the visualization of feature understanding step.
 
-import pandas as pd
-import math
 import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
+from .validate_input import get_user_confirmation
 
 class FeatureAnalyzer:
     def __init__(self, dataframe) -> None:
@@ -48,59 +47,48 @@ class FeatureAnalyzer:
     def _call_plots_from_dtypes(self):
         """Takes the columns for each dtype, and then sends to the appropriate plotting method to show distribution.
         """
-        sub_plot_columns:int = 3
 
-        if self._column_dtypes["numeric"]:
-            print("Creating histograms . . .")
-            numeric_columns: list[str] = self._column_dtypes["numeric"]
+        self._call_numeric_plots()
 
-            data: pd.DataFrame = self._dataframe[numeric_columns].melt(value_name="value", var_name="variable")
+    def _call_numeric_plots(self):
+        if not get_user_confirmation(message=f"[*] Would you like to display the {len(self._column_dtypes["numeric"])} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
+        
+        numeric_columns: list[str] = self._column_dtypes["numeric"]
 
-            g = sns.FacetGrid(
-                data=data,
-                col="variable",
-                col_wrap=sub_plot_columns,
-                sharex=False,
-                sharey=False
-            )
-            g.map_dataframe(sns.histplot, x="value", bins=20)
-            axes = g.axes
+        figures: list = []
 
-            for ax in axes:
-                ax.set_ylabel("count", loc="top")
-            
-        if self._column_dtypes["string"]:
-            object_columns: list[str] = self._column_dtypes["string"]
+        for index, column in enumerate(numeric_columns):
+            if index == 0:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(numeric_columns)}")
+                self._create_hist_plot(self._dataframe[column])
+            elif (index % 5 == 0):
+                plt.show()
+                input = "Press enter to continue . . . "
+                figures = []  # restting figures
 
-            data = (
-                self._dataframe[object_columns]
-                .melt().groupby("variable")["value"].value_counts().reset_index()
-                .groupby("variable").apply(lambda x: x.nlargest(20, 'count'), include_groups=False).reset_index()
-            )
-            data["value"] = data["value"].apply(lambda x: f"{x[:30]}..." if len(x) > 30 else f"{x}")
-
-            g = sns.FacetGrid(
-                    data=data,
-                    col="variable",
-                    col_wrap=1,
-                    sharex=False,
-                    sharey=False
-                )
-            g.map_dataframe(sns.barplot, x="count", y="value", orient="h", estimator="mean")
-
-            axes = g.axes
-
-            for ax in axes:
-                ax.set_ylabel("")
-
-        plt.show()
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(numeric_columns)}")
+                self._create_hist_plot(self._dataframe[column])
+            else:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(numeric_columns)}")
+                self._create_hist_plot(self._dataframe[column])
+        
+        if figures:
+            plt.show()
 
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         # TODO: calculate a way to find the best bins
         # ax = series_to_plot.plot.hist()
         # ax = self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
         # return ax
-        pass
+        ax = series_to_plot.plot.hist()
+        ax.set_title(f"{series_to_plot.name} histogram", loc="left")
+        ax.set_ylabel("frequency", loc="top")
+        ax.spines[["top", "right"]].set_visible(False)
+        return ax
 
     def _create_bar_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         ax = series_to_plot.value_counts().head(20).plot.bar()
