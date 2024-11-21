@@ -69,12 +69,29 @@ class FeatureAnalyzer:
             for ax in axes:
                 ax.set_ylabel("count", loc="top")
             
-
-        # TODO: Fix display for string types
         if self._column_dtypes["string"]:
             object_columns: list[str] = self._column_dtypes["string"]
 
-            data = self._dataframe[object_columns]
+            data = (
+                self._dataframe[object_columns]
+                .melt().groupby("variable")["value"].value_counts().reset_index()
+                .groupby("variable").apply(lambda x: x.nlargest(20, 'count'), include_groups=False).reset_index()
+            )
+            data["value"] = data["value"].apply(lambda x: f"{x[:30]}..." if len(x) > 30 else f"{x}")
+
+            g = sns.FacetGrid(
+                    data=data,
+                    col="variable",
+                    col_wrap=1,
+                    sharex=False,
+                    sharey=False
+                )
+            g.map_dataframe(sns.barplot, x="count", y="value", orient="h", estimator="mean")
+
+            axes = g.axes
+
+            for ax in axes:
+                ax.set_ylabel("")
 
         plt.show()
 
