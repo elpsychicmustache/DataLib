@@ -111,14 +111,21 @@ class FeatureAnalyzer:
         ax.set_title(f"{series_to_plot.name} histogram", loc="left")
         ax.set_ylabel("frequency", loc="top")
         ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
         return ax
 
     def _create_bar_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         top_20_values: pd.Series = series_to_plot.value_counts().head(20)
-        ax = top_20_values.plot.bar()
+
+        for index in top_20_values.index:
+            if len(index) > 30:
+                top_20_values = top_20_values.rename(index={index: f"{index[:27]}..."})
+
+        ax = top_20_values.plot.barh()
         ax.set_title(f"{series_to_plot.name} top {len(top_20_values)} values", loc="left")  # using len(top_20_values) in case there are less than 20 values
-        ax.set_ylabel("frequency", loc="top")
+        ax.set_xlabel("frequency", loc="left")
         ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
         return ax
 
 
