@@ -3,9 +3,9 @@
 
 # This class is used to perform the visualization of feature understanding step.
 
-import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+import pandas as pd
+from .validate_input import get_user_confirmation
 
 class FeatureAnalyzer:
     def __init__(self, dataframe) -> None:
@@ -42,39 +42,89 @@ class FeatureAnalyzer:
             else:
                 self._column_dtypes["unknown"].append(column)
 
-        print(f"TROUBLESHOOTING _column_dtypes: {self._column_dtypes}")  # FOR TROUBLESHOOTING - REMOVE LATER
-
     def _call_plots_from_dtypes(self):
         """Takes the columns for each dtype, and then sends to the appropriate plotting method to show distribution.
         """
-        if self._column_dtypes["numeric"]:
-            numeric_columns: list[str] = self._column_dtypes["numeric"]
 
-            for column in numeric_columns:
-                self._create_hist_plot(series_to_plot=self._dataframe[column])
+        self._call_numeric_plots()
+        self._call_object_plots()
 
-        if self._column_dtypes["string"]:
-            object_columns: list[str] = self._column_dtypes["string"]
+    def _call_numeric_plots(self):
+        numeric_columns: list[str] = self._column_dtypes["numeric"]
 
-            for column in object_columns:
-                self._create_bar_plot(series_to_plot=self._dataframe[column])
+        if not get_user_confirmation(message=f"[*] Would you like to display the {len(numeric_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
+        
+        figures: list = []
 
-    def _create_hist_plot(self, series_to_plot: pd.Series):
-        # TODO: calculate a way to find the best bins
+        for index, column in enumerate(numeric_columns):
+            if index == 0:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(numeric_columns)}")
+                self._create_hist_plot(self._dataframe[column])
+            elif (index % 5 == 0):
+                plt.show()
+                figures = []  # restting figures
+
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(numeric_columns)}")
+                self._create_hist_plot(self._dataframe[column])
+            else:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(numeric_columns)}")
+                self._create_hist_plot(self._dataframe[column])
+        
+        if figures:
+            plt.show()
+
+    def _call_object_plots(self):
+        string_columns: list[str] = self._column_dtypes["string"]
+        if not get_user_confirmation(message=f"[*] Would you like to display the {len(string_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
+
+        figures: list = []
+
+        for index, column in enumerate(string_columns):
+            if index == 0:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+            elif (index % 5 == 0):
+                plt.show()
+                figures = []  # restting figures
+
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+            else:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+        
+        if figures:
+            plt.show()
+
+    def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         ax = series_to_plot.plot.hist()
-        self._format_plot(ax=ax, plot_type="hist", column_name=series_to_plot.name)
-
-    def _create_bar_plot(self, series_to_plot: pd.Series):
-        ax = series_to_plot.value_counts().head(20).plot.bar()
-        self._format_plot(ax=ax, plot_type="bar", column_name=series_to_plot.name)
-
-    def _format_plot(self, ax: plt.matplotlib.axes.Axes, plot_type: str, column_name:str):
-        ax.spines[["right", "top"]].set_visible(False)
-        if plot_type == "bar":
-            ax.set_title(f"{column_name} top 20 values", loc="left")
-        elif plot_type == "hist":
-            ax.set_title(f"{column_name} histogram", loc="left")
+        ax.set_title(f"{series_to_plot.name} histogram", loc="left")
         ax.set_ylabel("frequency", loc="top")
-        plt.show()
+        ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
+        return ax
+
+    def _create_bar_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
+        top_20_values: pd.Series = series_to_plot.value_counts().head(20)
+
+        for index in top_20_values.index:
+            if len(index) > 30:
+                top_20_values = top_20_values.rename(index={index: f"{index[:27]}..."})
+
+        ax = top_20_values.plot.barh()
+        ax.set_title(f"{series_to_plot.name} top {len(top_20_values)} values", loc="left")  # using len(top_20_values) in case there are less than 20 values
+        ax.set_xlabel("frequency", loc="left")
+        ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
+        return ax
+
 
     

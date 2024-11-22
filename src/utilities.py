@@ -25,48 +25,62 @@ def get_df_from_csv(file_path: str, file_name: str, date_columns: list[str], col
 
 
 def prompt_selection_for_column_list(message: str, list_of_options: list[str], default_all: bool=True) -> list[str]:
-    """_summary_
-
-    Args:
-        message (str): The message to display to the user.
-        list_of_options (list[str]): The list of options the user can choose from.
-        default_all (bool, optional): If the user does nothing, return all options or return no options. Defaults to True.
-
-    Returns:
-        list[str]: The options the user chose.
-    """
-
     selection_list: list[int] = []
     option_dict: dict[int, str] = {i: list_of_options[i] for i in range(len(list_of_options))}
 
-    for (key, value) in option_dict.items():
-        print(f"{key}: {value}")
-    
-    # TODO: move to validate_input
-    print(message)
-    user_selection_str = str(input("Numbers should be separated by spaces: "))
-    if user_selection_str == "":
-        user_selection_list = []
-    else:
-        user_selection_list: list[int] = user_selection_str.split(" ")
+    show_options_to_user(message=message, option_dict=option_dict, default_all_flag=default_all)
+    user_input = get_user_input_str(message="Enter options: ")
+    selection_list = generate_list_from_input_str(user_input=user_input, option_dict=option_dict)
 
-    if user_selection_list:
-        for selection in user_selection_list:
-            selection_list.append(option_dict[int(selection)])
+    if selection_list:
         return selection_list
     else:
         if default_all:
-            return list(option_dict.values())
+            return list_of_options
         else:
             return []
     
+
+def show_options_to_user(message:str, option_dict:dict[str,str], default_all_flag:bool) -> None:
+    output_message: str = ""
+    output_message += message
+    for (key, value) in option_dict.items():
+        output_message += f"\n{key}: {value}"
+    if default_all_flag:
+        output_message += "\nNumbers should be separated by spaces. Leaving blank selects all."
+    else:
+        output_message += "\nNumbers should be separated by spaces. Leaving blank skips this."
+    
+    print(output_message)
+
+
+def get_user_input_str(message:str) -> str:
+    user_input = str(input(message))
+    return user_input
+
+
+def generate_list_from_input_str(user_input:str, option_dict:dict[str,str]) -> list[str]:
+    if user_input.strip() == "":
+        return []
+    
+    user_input_list: list[str] = user_input.strip().split(" ")
+    selection_list = []
+    for selection in user_input_list:
+        try:
+            selection_list.append(option_dict[int(selection)])
+        except KeyError:
+            raise KeyError(f"You entered an invalid option -> {selection}")
+        except ValueError:
+            raise ValueError(f"You entered an invalid option -> {selection}")
+    return selection_list
+
 
 def prompt_for_columns_to_rename(list_of_rename_items: list[str]) -> dict[str, str]:
     columns_to_rename: dict[str, str] = {}
 
     for column in list_of_rename_items:
-        new_column_name = str(input(f"[*] Rename column {column} to (leave blank to ignore change): ")).strip()
-
+        new_column_name: str = get_user_input_str(message=f"[*] Rename column {column} to (leave blank to ignore change): ").strip()
+        new_column_name = new_column_name.strip()
         if new_column_name != "":
             columns_to_rename[column] = new_column_name
 
@@ -79,9 +93,13 @@ def prompt_user_for_int(message: str, options: dict[int, str]) -> int:
     for key, value in options.items():
         print(f"{key}: {value}")
     
-    user_input: int = int(input())
+    user_input: int = int(get_user_input_str(message="Enter option: "))
 
+    return validate_input_is_in_options(user_input=user_input, options=options)
+    
+    
+def validate_input_is_in_options(user_input:int|str, options:dict[str|int, str]):
     if user_input in options:
         return user_input
     else:
-        raise ValueError(f"{user_input} is not a valid option from {list(options.keys())}")  # casting as list is needed for proper output
+        raise KeyError(f"{user_input} is not a valid option from {list(options.keys())}")
