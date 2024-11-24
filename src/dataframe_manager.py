@@ -22,6 +22,7 @@ class DataframeManager:
         """Class used to hold a Pandas dataframe so that standardized analysis can be performed on it.
 
         Args:
+            dataframe: (pd.DataFrame, optional): A pandas dataframe; else, pass file_path and/or file_name.
             file_path (str, optional): The path to the csv file. Defaults to "../data/input/".
             file_name (str, optional): The name of the csv file. Defaults to "data.csv".
             date_columns (list[str], optional): Columns that contain date information.. Defaults to None.
