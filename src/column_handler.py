@@ -9,3 +9,11 @@ class ColumnHandler:
     def __init__(self, dataframe: pd.DataFrame) -> None:
         self.dataframe = dataframe
 
+    def remove_columns(self) -> None:
+        pass
+
+    def rename_columns(self) -> None:
+        pass
+
+    def analyze_dtypes(self) -> None:
+        pass
