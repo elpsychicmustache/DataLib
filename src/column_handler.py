@@ -12,7 +12,7 @@ class ColumnHandler:
     def __init__(self, dataframe: pd.DataFrame) -> None:
         self._dataframe = dataframe
 
-    def remove_columns(self) -> None:
+    def remove_columns_interactively(self) -> None:
         """Provides the user a way to interactively delete columns from the dataframe.
         """
     
@@ -29,7 +29,7 @@ class ColumnHandler:
         else:
             print("[-] No columns removed!")
 
-    def rename_columns(self) -> None:
+    def rename_columns_interactively(self) -> None:
         """Provides the user a way to interactively rename the columns.
         """
 
