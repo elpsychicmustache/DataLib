@@ -5,7 +5,7 @@
 
 import pandas as pd
 
-from utilities import prompt_selection_for_column_list
+from utilities import prompt_selection_for_column_list, prompt_for_columns_to_rename
 from validate_input import get_user_confirmation
 
 class ColumnHandler:
@@ -30,7 +30,26 @@ class ColumnHandler:
             print("[-] No columns removed!")
 
     def rename_columns(self) -> None:
-        pass
+        """Provides the user a way to interactively rename the columns.
+        """
+
+        user_wants_to_rename = get_user_confirmation(message="[*] Would you like to rename any columns? [Y/n]: ", true_options=["yes", "y", ""], false_options=["no", "n"])
+
+        columns_to_rename: list[str] = []
+        if user_wants_to_rename:
+            # TODO: update prompt_selection_for_column_list to dynamically inform user what the default for leaving blank is.
+            columns_to_rename = prompt_selection_for_column_list(message="[*] Please enter the numbers next to each column that you would like to rename. Leave blank to select all columns.", list_of_options=self._dataframe.columns)
+
+        rename_dict: dict[str, str] = {}
+        if columns_to_rename:
+            rename_dict = prompt_for_columns_to_rename(columns_to_rename)
+
+        if columns_to_rename:
+            print(f"[!] Renaming the following columns: {rename_dict.keys()}")
+            self._dataframe = self._dataframe.rename(columns=rename_dict)
+            print(f"[+] Columns have been renamed.")
+        else:
+            print("[-] No columns renamed!")
 
     def analyze_dtypes(self) -> None:
         pass
