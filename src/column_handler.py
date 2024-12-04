@@ -97,7 +97,7 @@ class ColumnHandler:
             
     def _change_column_to_datetime(self, column_name:str) -> None:
         self._dataframe[column_name] = pd.to_datetime(self._dataframe[column_name])
-    def _change_column_to_numeric(self, column_name:str, numeric_type:str) -> None:
+    def _change_column_to_numeric(self, column_name:str) -> None:
         self._dataframe[column_name] = pd.to_numeric(self._dataframe[column_name])
     def _change_column_to_categorical(self, column_name:str) -> None:
         self._dataframe[column_name] = pd.Categorical(self._dataframe[column_name])
