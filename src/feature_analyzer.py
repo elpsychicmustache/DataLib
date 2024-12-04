@@ -48,11 +48,12 @@ class FeatureAnalyzer:
 
         self._call_numeric_plots()
         self._call_object_plots()
+        self._call_time_plots()
 
     def _call_numeric_plots(self):
         numeric_columns: list[str] = self._column_dtypes["numeric"]
 
-        if not get_user_confirmation(message=f"[*] Would you like to display the {len(numeric_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+        if len(numeric_columns) != 0 and not get_user_confirmation(message=f"[*] Would you like to display the {len(numeric_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
             return
         
         figures: list = []
@@ -79,7 +80,7 @@ class FeatureAnalyzer:
 
     def _call_object_plots(self):
         string_columns: list[str] = self._column_dtypes["string"]
-        if not get_user_confirmation(message=f"[*] Would you like to display the {len(string_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+        if len(string_columns) and not get_user_confirmation(message=f"[*] Would you like to display the {len(string_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
             return
 
         figures: list = []
@@ -103,6 +104,11 @@ class FeatureAnalyzer:
         
         if figures:
             plt.show()
+
+    def _call_time_plots(self):
+        time_columns: list[str] = self._column_dtypes["datetime"]
+        if len(time_columns) and not get_user_confirmation(message=f"[*] Would you like to display the {len(time_columns)} time-series graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
 
     def _create_hist_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
         ax = series_to_plot.plot.hist()
