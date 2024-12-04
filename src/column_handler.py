@@ -5,8 +5,8 @@
 
 import pandas as pd
 
-from utilities import prompt_selection_for_column_list, prompt_for_columns_to_rename, prompt_user_for_int
-from validate_input import get_user_confirmation
+from .utilities import prompt_selection_for_column_list, prompt_for_columns_to_rename, prompt_user_for_int
+from .validate_input import get_user_confirmation
 
 class ColumnHandler:
     def __init__(self, dataframe: pd.DataFrame) -> None:
