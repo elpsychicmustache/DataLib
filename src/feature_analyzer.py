@@ -48,11 +48,12 @@ class FeatureAnalyzer:
 
         self._call_numeric_plots()
         self._call_object_plots()
+        self._call_time_plots()
 
     def _call_numeric_plots(self):
         numeric_columns: list[str] = self._column_dtypes["numeric"]
 
-        if not get_user_confirmation(message=f"[*] Would you like to display the {len(numeric_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+        if len(numeric_columns) != 0 and not get_user_confirmation(message=f"[*] Would you like to display the {len(numeric_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
             return
         
         figures: list = []
@@ -79,7 +80,7 @@ class FeatureAnalyzer:
 
     def _call_object_plots(self):
         string_columns: list[str] = self._column_dtypes["string"]
-        if not get_user_confirmation(message=f"[*] Would you like to display the {len(string_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+        if len(string_columns) and not get_user_confirmation(message=f"[*] Would you like to display the {len(string_columns)} numeric graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
             return
 
         figures: list = []
@@ -100,7 +101,34 @@ class FeatureAnalyzer:
                 figures.append(plt.figure())
                 print(f"[!] Creating plot {index + 1}/{len(string_columns)}")
                 self._create_bar_plot(self._dataframe[column])
-        
+
+        if figures:
+            plt.show()
+
+    def _call_time_plots(self):
+        time_columns: list[str] = self._column_dtypes["datetime"]
+        if len(time_columns) and not get_user_confirmation(message=f"[*] Would you like to display the {len(time_columns)} time-series graphs? (Y/n): ", true_options=["y","yes", ""], false_options=["n", "no"]):
+            return
+
+        figures: list = []
+
+        for index, column in enumerate(time_columns):
+            if index == 0:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(time_columns)}")
+                self._create_time_plot(self._dataframe[column])
+            elif (index % 5 == 0):
+                plt.show()
+                figures = []  # restting figures
+
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(time_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+            else:
+                figures.append(plt.figure())
+                print(f"[!] Creating plot {index + 1}/{len(time_columns)}")
+                self._create_bar_plot(self._dataframe[column])
+
         if figures:
             plt.show()
 
@@ -125,6 +153,18 @@ class FeatureAnalyzer:
         ax.spines[["top", "right"]].set_visible(False)
         plt.tight_layout()
         return ax
+    
+    def _create_time_plot(self, series_to_plot: pd.Series) -> plt.matplotlib.axes.Axes:
+        time_data = series_to_plot.dt.to_period(freq="M").value_counts()
+        time_data = time_data.sort_index()
+
+        ax = time_data.plot.bar()
+        ax.set_title(f"{series_to_plot.name}", loc="left")
+        ax.set_ylabel("frequency", loc="top")
+        ax.spines[["top", "right"]].set_visible(False)
+        plt.tight_layout()
+        return ax
+
 
 
     
